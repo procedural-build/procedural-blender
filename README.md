@@ -14,7 +14,17 @@ Install the addon in Blender with the following steps
 ## Build distributable zip package
 
 Build a zip package for distributing the Blender addon with:
-
 ```
 ./make.sh
+```
+
+This will make the zip file `./bin/procedural_compute.zip` which can be distributed and installed
+into Blender as per the instructions above.
+
+## Linking code for development
+
+For development you can symbolically link the module source code directly into your
+blender scripts folder with the command:
+```
+./link.sh
 ```

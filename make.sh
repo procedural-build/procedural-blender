@@ -1,3 +1,3 @@
 #!/bin/bash
 
-zip -r ./bin/procedural_compute.zip ./src
+zip -r ./bin/procedural_compute.zip ./procedural_compute
