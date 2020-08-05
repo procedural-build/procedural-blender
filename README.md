@@ -7,7 +7,7 @@ Scripts, components and utilities for Blender 2.82+
 Install the addon in Blender with the following steps
 
 * Go to the latest *stable* here:
-  * https://github.com/procedural-build/procedural-blender/blob/master/releases/latest/procedural_compute.zip
+  * https://github.com/procedural-build/procedural-blender/raw/master/releases/latest/procedural_compute.zip
 * Go to Blender -> Edit -> Preferences -> Addons -> Install... and select the .zip package
 
 
