@@ -1,8 +1,11 @@
 
 
 bl_info = {
-    "name": "Procedural Compute - API Client",
+    "name": "Procedural Build - API Client",
+    "description": "Blender Client for interation with Procedural.build's vertically integrated set of APIs for advanced AEC sustainability",
+    "author": "Procedural.build",
     "blender": (2, 80, 0),
+    "wiki_url": "https://discourse.procedural.build",
     "category": "Object",
 }
 

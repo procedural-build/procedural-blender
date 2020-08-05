@@ -6,7 +6,8 @@ Scripts, components and utilities for Blender 2.82+
 
 Install the addon in Blender with the following steps
 
-* Download the latest release from GitHub
+* Download the latest release from GitHub:
+ * *Stable* version from here: https://github.com/procedural-build/procedural-blender/archive/master.zip
 * Go to Blender -> Edit -> Preferences -> Addons -> Install... and select the .zip package
 
 
