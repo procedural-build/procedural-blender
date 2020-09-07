@@ -119,13 +119,16 @@ class User():
         """ Try to parse the response as JSON, otherwise just return the raw response
         """
         decoded_response = self.last_response
+        content = ""
         try:
-            decoded_response = json.loads(self.last_response.read().decode('utf8'))
-        except TypeError:
-            decoded_response = self.last_response
-        except json.JSONDecodeError:
-            decoded_response = self.last_response
-        print(f"Response: {decoded_response}")
+            content = self.last_response.read().decode('utf8')
+            decoded_response = json.loads(content)
+            return decoded_response
+        except (TypeError, json.JSONDecodeError):
+            # Attach the read content onto the response object (for future use)
+            decoded_response.read_content = content
+            return decoded_response
+        # Should not get here
         return decoded_response
 
     def request(self, method, url, data=None, query_params=None, extra_headers=None, raw=False):
@@ -146,7 +149,7 @@ class User():
             data = None
 
         # Get the actual request object
-        print(f"Sending Request: [{method}] {url}")
+        print(f"Sending Request: [{method}] {url}: {data}")
         #print(f"Sending data: {data}")
         request = Req.Request(url, method=method, data=data, headers=self.headers(extra_headers))
         try:
@@ -161,3 +164,7 @@ class User():
 
 
 USER = [User('', '')]
+
+
+def get_current_user():
+    return USER[0]

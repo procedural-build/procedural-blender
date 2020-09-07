@@ -27,8 +27,8 @@ def get_or_create_queue(name, length=4):
     return queues[name]
 
 
-def put_item(_queue, item, args):
-    thread = threading.Thread(target=item, args=args)
+def put_item(_queue, item, args, **kwargs):
+    thread = threading.Thread(target=item, args=args, kwargs=kwargs)
     thread.daemon = True
     _queue.put(thread, True)
     thread.start()
@@ -38,9 +38,9 @@ def put_item(_queue, item, args):
     return None
 
 
-def queue_fun(queue_name, _function, args=()):
+def queue_fun(queue_name, _function, args=(), kwargs={}):
     _queue = get_or_create_queue(queue_name)
-    put_thread = threading.Thread(target=put_item, args=(_queue, _function, args))
+    put_thread = threading.Thread(target=put_item, args=(_queue, _function, args), kwargs=kwargs)
     put_thread.daemon = True
     put_thread.start()
     return None

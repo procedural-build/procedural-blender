@@ -8,9 +8,12 @@
 
 
 import bpy
+import random
 
 from procedural_compute.core.utils.addRemoveMeshObject import addObject
 from mathutils.geometry import intersect_line_line, intersect_ray_tri
+
+from .utils import color_polygons
 
 ################################
 # MESH OPERATORS

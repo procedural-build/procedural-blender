@@ -14,7 +14,7 @@ from procedural_compute.cfd.properties.scene.mesh import BM_SCENE_CFDMesh
 from procedural_compute.cfd.properties.scene.control import BM_SCENE_CFDControl
 from procedural_compute.cfd.properties.scene.solver import BM_SCENE_CFDSolver
 from procedural_compute.cfd.properties.scene.system import BM_SCENE_CFDSystem
-
+from procedural_compute.cfd.properties.scene.postproc import BM_SCENE_CFDPostProc
 
 class BM_SCENE_CFD(bpy.types.PropertyGroup):
 
@@ -22,6 +22,7 @@ class BM_SCENE_CFD(bpy.types.PropertyGroup):
     control: bpy.props.PointerProperty(type=BM_SCENE_CFDControl)
     solver: bpy.props.PointerProperty(type=BM_SCENE_CFDSolver)
     system: bpy.props.PointerProperty(type=BM_SCENE_CFDSystem)
+    postproc: bpy.props.PointerProperty(type=BM_SCENE_CFDPostProc)
 
     items_list = makeTuples(["System", "Solver", "Mesh", "Control", "PostProc"])
     menu: bpy.props.EnumProperty(name="CFDMenu", items=items_list, description="CFD menu categories", default="System")
@@ -30,14 +31,6 @@ class BM_SCENE_CFD(bpy.types.PropertyGroup):
 
     def drawMenu(self, layout):
         layout.row().prop(self, "menu", expand=True)
-        if self.menu == 'PostProc':
-            if 'Windows' in bpy.app.build_platform.decode():
-                layout.row().label(text="Please run external Paraview application")
-            else:
-                sc = bpy.context.scene
-                layout.box().row().prop(sc.ODS_CFD.system, "caseDir")
-                layout.row().operator("scene.cfdoperators", text="Run ParaView").command = "paraView"
-            return None
         c = getattr(self, self.menu.lower())
         c.drawMenu(layout)
         return None

@@ -33,10 +33,11 @@ class BM_OBJ_CFD_MESH(bpy.types.PropertyGroup):
     meshMaxLevel: bpy.props.IntProperty(name="max", min=0, default=0, description="meshMaxLevel", update=setMeshMinMax)
     nSurfaceLayers: bpy.props.IntProperty(name="nSurfaceLayers", min=0, default=0, description="nSurfaceLayers")
 
-    makeRefinementRegion: bpy.props.BoolProperty(name="makeRefinementRegion", default=False, description="Make this object a Refinement Region")
+    makeRefinementRegion: bpy.props.BoolProperty(name="refinementRegion", default=False, description="Make this object a Refinement Region")
+    makeCellSet: bpy.props.BoolProperty(name="cellSet", default=False, description="Make this object a cellSet")
     items_list = makeTuples(["distance", "inside", "outside", "surface"])
-    refinementMode: bpy.props.EnumProperty(name="refinementMode", items=items_list, description="Preset", default="inside", update=setLevel)
-    distanceLevels: bpy.props.StringProperty(name="distanceLevels", description="Levels at Distances: (distance level)", default="((1 4))")
+    refinementMode: bpy.props.EnumProperty(name="mode", items=items_list, description="Preset", default="inside", update=setLevel)
+    distanceLevels: bpy.props.StringProperty(name="levels", description="Levels at Distances: (distance level)", default="((1 4))")
 
     def drawMenu(self, layout):
         sc = bpy.context.scene
@@ -45,22 +46,21 @@ class BM_OBJ_CFD_MESH(bpy.types.PropertyGroup):
         split = L.split()
 
 
-        col = split.column()
-        col.prop(self, "meshMinLevel")
-        col = split.column()
-        col.prop(self, "meshMaxLevel")
+        split.column().prop(self, "meshMinLevel")
+        split.column().prop(self, "meshMaxLevel")
         if sc.ODS_CFD.mesh.addLayers:
-            col = split.column()
-            col.prop(self, "nSurfaceLayers")
+            split.column().prop(self, "nSurfaceLayers")
 
         # Make Refinement Region
-        col = split.column()
-        col.prop(self, "makeRefinementRegion")
+        split.column().prop(self, "makeRefinementRegion")
+        split.column().prop(self, "makeCellSet")
 
-        if self.makeRefinementRegion:
+        if self.makeRefinementRegion or self.makeCellSet:
             L = layout.box()
-            L.row().prop(self, "refinementMode")
-            L.row().prop(self, "distanceLevels")
+            row = L.row()
+            row.prop(self, "refinementMode")
+            if self.makeRefinementRegion:
+                row.prop(self, "distanceLevels")
 
         layout.row().operator("scene.cfdoperators", text="Copy to Selected").command = "copyMeshLevels"
 

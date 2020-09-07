@@ -22,6 +22,8 @@ import procedural_compute.cfd.solvers
 from procedural_compute.core.utils.compute.auth import USER, User
 from procedural_compute.core.utils.compute.view import GenericViewSet
 
+from .utils import get_sets_from_selected, color_object
+
 
 class SCENE_OT_cfdOperators(bpy.types.Operator):
     bl_label = "Compute CFD Operations"
@@ -69,6 +71,11 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         project_number = system_settings.project_number
         task_name = system_settings.task_name.strip()
 
+        # Get the list of projects
+        if not project_number:
+            project_list = GenericViewSet('/api/project/').list()
+            project_number = len(project_list) or 1
+
         # Get or create the project
         project = GenericViewSet('/api/project/').get_or_create(
             { 'name': project_name },
@@ -77,7 +84,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         )
         if project:
             system_settings.project_name = project.get('name')
-            system_settings.project_number = project.get('number') or ""
+            system_settings.project_number = str(project.get('number')) or ""
             system_settings.project_id = project.get('uid')
             system_settings.project_data = json.dumps(project)
 
@@ -106,7 +113,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         system_settings = bpy.context.scene.ODS_CFD.system
         task_id = system_settings.task_id
 
-        geometry_objects = [obj for obj in bpy.context.visible_objects if not obj.ODS_CFD.mesh.makeRefinementRegion]
+        geometry_objects = [obj for obj in bpy.context.visible_objects if not self._separate_stl(obj)]
         geometry = io.StringIO()
         asciiSTLExport.writeObjectsToFile(geometry, objects=geometry_objects)
         geometry.seek(0)
@@ -120,23 +127,30 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             raw=True
         )
 
-        self.upload_refinement_regions()
+        self.upload_separate_surfaces()
 
         return response
 
-    def upload_refinement_regions(self):
+    def _separate_stl(self, obj):
+        return obj.ODS_CFD.mesh.makeRefinementRegion or obj.ODS_CFD.mesh.makeCellSet
+
+    def _has_cellsets(self):
+        cellset_objects = [obj for obj in bpy.context.visible_objects if obj.ODS_CFD.mesh.makeCellSet]
+        return True if cellset_objects else False
+
+    def upload_separate_surfaces(self):
         system_settings = bpy.context.scene.ODS_CFD.system
         task_id = system_settings.task_id
 
         print("Writing refinement regions")
-        refinement_objects = [obj for obj in bpy.context.visible_objects if obj.ODS_CFD.mesh.makeRefinementRegion]
-        for obj in refinement_objects:
+        separate_objects = [obj for obj in bpy.context.visible_objects if self._separate_stl(obj)]
+        for obj in separate_objects:
             name = foamUtils.formatObjectName(obj.name)
-            print(f" - Writing refinement region: {name}")
+            print(f" - Writing separate stl region: {name}")
             geometry = io.StringIO()
             asciiSTLExport.writeObjectsToFile(geometry, objects = [obj])
             geometry.seek(0)
-            print(" -- Cast geometry to STL format")
+            print(" -- Cast refinement regions and cell sets to STL format")
             response = GenericViewSet(
                 f'/api/task/{task_id}/file/foam/constant/triSurface/{name}.stl/'
             ).update(
@@ -145,7 +159,29 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
                 raw=True
             )
 
-    def get_or_create_empty_task(self, project_id, name, parent_task_id, dependent_on=None):
+    def upload_setset(self):
+        system_settings = bpy.context.scene.ODS_CFD.system
+        task_id = system_settings.task_id
+
+        cellset_objects = [obj for obj in bpy.context.visible_objects if obj.ODS_CFD.mesh.makeCellSet]
+        if not cellset_objects:
+            return None
+
+        setset_str = ""
+        for obj in cellset_objects:
+            name = foamUtils.formatObjectName(obj.name)
+            setset_str += f'cellSet {name} new surfaceToCell "constant/triSurface/{name}.stl" ((0 0 0)) true true false 0 0\n'
+
+            print(f" - Writing separate setSet file:\n\n {setset_str}")
+            response = GenericViewSet(
+                f'/api/task/{task_id}/file/foam/cellSets.setSet/'
+            ).update(
+                None,
+                setset_str.encode('utf8'),
+                raw=True
+            )
+
+    def get_or_create_task(self, project_id, name, parent_task_id, dependent_on=None, config=None):
         query_params = {
             'name': name,
             'parent': parent_task_id,
@@ -153,14 +189,15 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         if dependent_on is not None:
             query_params.update({'dependent_on': dependent_on})
 
+        if not config:
+            config = {'task_type': 'empty'}
+
         action_task = GenericViewSet(
             f'/api/project/{project_id}/task/'
         ).get_or_create(
             query_params,
             {
-                'config': {
-                    'task_type': 'empty'
-                }
+                'config': config
             },
             create = True
         )
@@ -176,8 +213,8 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         task_id = system_settings.task_id
 
         # Get or create an empty setup task
-        setup_task = self.get_or_create_empty_task(
-            project_id, 'setup', task_id
+        setup_task = self.get_or_create_task(
+            project_id, 'setup', task_id,
         )
 
         # Write the mesh files
@@ -186,8 +223,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         ).update(
             setup_task['uid'],
         {
-            'name': 'setup',
-            'status': 'pending',
+            'status': "pending",
             'config': {
                 'task_type': 'magpy',
                 'cmd': 'cfd.io.tasks.write_mesh',
@@ -205,11 +241,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         task_id = system_settings.task_id
 
         # Get or create an empty setup task
-        setup_task = self.get_or_create_empty_task(
+        setup_task = self.get_or_create_task(
             project_id, 'setup', task_id
         )
-
-        #print("SOLVER PROPERTIES: %s"%(solver_properties.to_json()))
 
         # the action to create the CFD files
         setup_task = GenericViewSet(
@@ -217,8 +251,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         ).update(
             setup_task['uid'],
             {
-                'name': 'setup',
-                'status': 'pending',
+                'status': "pending",
                 'config': {
                     'task_type': 'magpy',
                     'cmd': 'cfd.io.tasks.write_solution',
@@ -230,18 +263,18 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return setup_task
 
 
-    def basic_mesh(self):
+    def run_mesh_pipeline(self):
         system_settings = bpy.context.scene.ODS_CFD.system
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
         # Get or create an empty setup task
-        setup_task = self.get_or_create_empty_task(
+        setup_task = self.get_or_create_task(
             project_id, 'setup', task_id
         )
 
         # Get or create the mesh task
-        mesh_task = self.get_or_create_empty_task(
+        mesh_task = self.get_or_create_task(
             project_id, 'mesh', task_id, dependent_on=setup_task['uid']
         )
 
@@ -251,16 +284,17 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         ).update(
             mesh_task['uid'],
             {
-                'name': 'mesh',
-                'status': 'pending',
+                'status': "pending",
                 'config': {
                     'task_type': 'cfd',
                     'cmd': 'pipeline',
+                    'cpus': [i for i in system_settings.decompN],
                     'commands': [
                         'blockMesh',
                         "snappyHexMesh -overwrite",
                         "reconstructParMesh -constant -mergeTol 1e-6",
-                        "!checkMesh -writeSets vtk"
+                        "!checkMesh -writeSets vtk",
+                        "foamToSurface -constant surfaceMesh.obj"
                     ]
                 }
             }
@@ -275,25 +309,29 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
+        # Get or create the mesh task
+        mesh_task = self.get_or_create_task(
+            project_id, 'mesh', task_id
+        )
+
         # Get or create an empty setup task
-        solver_task = self.get_or_create_empty_task(
-            project_id, 'solution', task_id
+        solver_task = self.get_or_create_task(
+            project_id, 'solution', task_id, dependent_on=mesh_task['uid']
         )
 
         # Dispatch to the mesh task
         solver_task = GenericViewSet(
             f'/api/project/{project_id}/task/'
         ).update(
-            mesh_task['uid'],
+            solver_task['uid'],
             {
-                'name': 'mesh',
-                'status': 'pending',
+                'status': "pending",
                 'config': {
                     'task_type': 'cfd',
                     'cmd': 'pipeline',
                     'commands': [
                         solver_properties.name,
-                        "reconstructPar -skipZero"
+                        "reconstructPar -noZero"
                     ],
                     'cpus': [i for i in system_settings.decompN],
                     'iterations': control_properties.endTime
@@ -302,6 +340,144 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         )
 
         return solver_task
+
+    def run_wind_tunnel(self):
+        system_settings = bpy.context.scene.ODS_CFD.system
+        solver_properties = bpy.context.scene.ODS_CFD.solver
+        mesh_properties = bpy.context.scene.ODS_CFD.mesh
+        control_properties = bpy.context.scene.ODS_CFD.control
+        project_id = system_settings.project_id
+        task_id = system_settings.task_id
+
+        # Get or create the mesh task
+        mesh_task = self.get_or_create_task(
+            project_id, 'mesh', task_id
+        )
+
+        # Angles and increments
+        n_angles = 16
+        incr = 360 / n_angles
+
+        # Get the details of the domain
+        # Note: these are optional - as these are also stored in the foam.config file on the server when the case is setup
+        mesh_properties_json = mesh_properties.domain_json()
+        cell_dimensions = mesh_properties_json['cell_size']
+        bb = mesh_properties_json['bounding_box']
+        bounding_box = [abs(bb['max'][i] - bb['min'][i]) for i in range(3)]
+
+        # Get or create an empty setup task
+        solver_task = self.get_or_create_task(
+            project_id, 'VirtualWindTunnel', task_id,
+            dependent_on=mesh_task['uid'],
+            config = {
+                'task_type': 'cfd',
+                'cmd': 'wind_tunnel',
+                'case_dir': "foam",
+                'commands': [i * incr for i in range(n_angles)],
+                'cpus': [i for i in system_settings.decompN],
+                'cell_dimensions': {"x": cell_dimensions, "y": cell_dimensions, "z": cell_dimensions},
+                'bounding_box': {"x": bounding_box[0], "y": bounding_box[1], "z": bounding_box[2]},
+                'iterations': {
+                    'init': control_properties.endTime,
+                    'run': control_properties.endTime
+                }
+            }
+        )
+
+        return solver_task
+
+    def run_wind_thresholds(self):
+        system_settings = bpy.context.scene.ODS_CFD.system
+        solver_properties = bpy.context.scene.ODS_CFD.solver
+        control_properties = bpy.context.scene.ODS_CFD.control
+        project_id = system_settings.project_id
+        task_id = system_settings.task_id
+
+        # Get or create an empty setup task
+        vwt_task = self.get_or_create_task(
+            project_id, 'VirtualWindTunnel', task_id, dependent_on=mesh_task['uid']
+        )
+
+        # Get or create an empty setup task
+        solver_task = self.get_or_create_task(
+            project_id, 'WindThreshold', task_id,
+            dependent_on=vwt_task['uid'],
+            config = {
+                'task_type': 'cfd',
+                'cmd': 'run_wind_thresholds',
+                'case_dir': "foam",
+                'cpus': [6, 4, 1],
+                'patches': [],
+                'epw_file': ''
+            }
+        )
+
+        return solver_task
+
+    def probe_selected(self):
+        system_settings = bpy.context.scene.ODS_CFD.system
+        solver_properties = bpy.context.scene.ODS_CFD.solver
+        postproc_properties = bpy.context.scene.ODS_CFD.postproc
+        project_id = system_settings.project_id
+        task_id = system_settings.task_id
+
+        # Get or create an empty setup task
+        sub_task = self.get_or_create_task(
+            project_id, 'PostProcess', task_id
+        )
+
+        config = {
+            'task_type': 'cfd',
+            "cmd": "pipeline",
+            "case_dir": "VWT/",
+            "cpus": [1, 1, 1],
+            "commands": [
+                "write_sample_set",
+                "!postProcess -func internalCloud"
+            ],
+            "fields": ["Utrans", "p"],
+            "sets": get_sets_from_selected()
+        }
+
+        # the action to create the CFD files
+        setup_task = GenericViewSet(
+            f'/api/project/{project_id}/task/'
+        ).update(
+            sub_task['uid'],
+            {
+                'status': "pending",
+                'config': config
+            }
+        )
+
+        # Start polling for the probe results
+        if postproc_properties.auto_load_probes:
+            self.load_selected_probes()
+
+        return setup_task
+
+    def load_selected_probes(self):
+        from procedural_compute.core.operators import fetch_async, fetch_sync
+
+        system_settings = bpy.context.scene.ODS_CFD.system
+        solver_properties = bpy.context.scene.ODS_CFD.solver
+        postproc_properties = bpy.context.scene.ODS_CFD.postproc
+        project_id = system_settings.project_id
+        task_id = system_settings.task_id
+
+        # We should first check the VWT folder and get all of the angles that are available
+
+        first_object = bpy.context.selected_objects[0]
+        base_url = f"/api/task/{task_id}/file"  # {system_settings.host}
+        file_url = f"{base_url}/VWT/postProcessing/internalCloud/0.0/{first_object.name}_Utrans.xy/"
+
+        def handle_probe_data(data):
+            lines = data.splitlines()
+            print(f"GOT DATA FOR {file_url}. Lines: {len(lines)}.  Applying to object: {first_object.name}")
+            color_object(first_object, lines, scale=[0, 5])
+
+        print(f"Waiting for file from url: {file_url}")
+        fetch_async(file_url, callback=handle_probe_data, timeout=30, query_params={'download': 'true'})
 
 
 

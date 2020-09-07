@@ -75,9 +75,13 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
         layout.row().operator("scene.compute_cfdoperators", text="Write Mesh Files").command = "write_mesh_files"
         layout.row().operator("scene.compute_cfdoperators", text="Write Solver Files").command = "write_solver_files"
 
+        row = layout.row()
+        row.operator("scene.compute_cfdoperators", text="Run Mesh Pipeline").command = "run_mesh_pipeline"
+
+        '''
         if self.basic:
             row = layout.row()
-            row.operator("scene.cfdoperators", text="Mesh").command = "basicMesh"
+            row.operator("scene.compute_cfdoperators", text="Run Mesh Pipeline").command = "run_mesh_pipeline"
             row.prop(self, "basic", text="Basic Mesh")
         else:
             row = layout.row()
@@ -93,7 +97,9 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
                 col.operator("scene.cfdoperators", text="decomposePar").command = "decomposePar"
                 col.operator("scene.cfdoperators", text="reconstructParMesh").command = "reconstructParMesh"
                 #col.operator("scene.cfdoperators", text="reconstructPar").command = "reconstructPar"
+        '''
 
+        '''
         row = layout.row()
         row.prop(self, "castellated")
         row.prop(self, "hideCastellatedMenu")
@@ -139,6 +145,7 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
             layout.row().prop(self, "minMedianAxisAngle")
             layout.row().prop(self, "nBufferCellsNoExtrude")
             layout.row().prop(self, "nLayerIter")
+        '''
 
     def get_unique_object(self, object_name):
         objects = bpy.context.visible_objects

@@ -51,9 +51,16 @@ class BM_SCENE_CFDControl(bpy.types.PropertyGroup):
         sc = bpy.context.scene
         split = layout.split()
 
-        row = layout.row()
-        row.operator("scene.cfdoperators", text="Write controlDict").command = "writeControlDict"
+        layout.row().operator("scene.compute_cfdoperators", text="Run Solver").command = "run_solver"
 
+        layout.row().operator("scene.compute_cfdoperators", text="Run Wind Tunnel").command = "run_wind_tunnel"
+
+        layout.row().prop(self, "endTime")
+        #layout.row().prop(self, "stopAt", expand=False)
+        #row = layout.row()
+        #row.operator("scene.cfdoperators", text="Write controlDict").command = "write_control_dict"
+
+        '''
         if self.basic:
             row = layout.row()
             row.operator("scene.cfdoperators", text="Run Case").command = "basicRun"
@@ -99,6 +106,7 @@ class BM_SCENE_CFDControl(bpy.types.PropertyGroup):
         layout.row().prop(self, "runTimeModifiable")
         if "ageing" in sc.ODS_CFD.solver.name:
             layout.row().prop(self, "solveFlow")
+        '''
 
     def getText(self):
         sc = bpy.context.scene
