@@ -1,9 +1,9 @@
 ###########################################################
-# Blender Modelling Environment for Architecture
-# Copyright (C) 2011, ods-engineering
-# License : ods-engineering license
+# Blender Addon for Procedural Cloud-based Design Tools
+# Copyright (C) 2020, Procedural (ApS) Denmark
+# License : procedural.build license
 # Version : 1.2
-# Web     : www.ods-engineering.com
+# Web     : www.procedural.build
 ###########################################################
 
 from .gui import *

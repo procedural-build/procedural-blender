@@ -1,5 +1,5 @@
 ###########################################################
-# Blender Modelling Environment for Architecture
+# Blender Addon for Procedural Cloud-based Design Tools
 # Copyright (C) 2011, ODS-Engineering
 # License: ods-engineering license
 # Version: 1.2

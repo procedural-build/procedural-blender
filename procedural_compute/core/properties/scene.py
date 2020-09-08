@@ -1,5 +1,5 @@
 ###########################################################
-# Blender Modelling Environment for Architecture
+# Blender Addon for Procedural Cloud-based Design Tools
 # Copyright (C) 2020, Procedural Compute
 # License : procedural compute license
 # Version : 1.2

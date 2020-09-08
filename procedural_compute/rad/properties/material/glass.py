@@ -1,0 +1,54 @@
+###########################################################
+# Blender Addon for Procedural Cloud-based Design Tools
+# Copyright (C) 2020, Procedural (ApS) Denmark
+# License : procedural.build license
+# Version : 1.2
+# Web     : www.procedural.build
+###########################################################
+
+
+import bpy
+
+from procedural_compute.rad.utils.radUtils import formatName
+
+class BM_MAT_RAD_GLASS(bpy.types.PropertyGroup):
+
+    transmittance: bpy.props.FloatProperty(
+        name="visibleTransmittance",
+        description="Visible Transmittance at Normal Incidence",
+        default=0.881, min=0.0, max=1.0, precision=4)
+    
+    def drawMenu(self, layout):
+        layout.row().prop(self, "transmittance")
+
+    def getMatRGB(self):
+        m = self.id_data
+        (r,g,b) = m.diffuse_color * m.diffuse_intensity
+        return (r,g,b)
+
+    def transmissivity(self):
+        Tn = self.transmittance
+        # From: http://paulbourke.net/dataformats/rad/rad25.html
+        tn = (((0.8402528435+0.0072522239*Tn*Tn)**0.5) - 0.9166530661)/0.0036261119/Tn
+        return tn
+
+    def rgbFactors(self):
+        (r,g,b) = self.getMatRGB()
+        tn = self.transmissivity()
+        v = []
+        for vv in [r,g,b]:
+            vc = (vv/sum([r,g,b]))*(tn*3)
+            if vc > 1.0:
+                vc = 1.0
+            v.append(vc)
+        return v
+    
+    def textRAD(self):
+        v = self.rgbFactors()
+        text = "\n## material conversion from blender \"diffuse_color\" property"
+        text += "\nvoid glass %s"%(formatName(self.id_data.name))
+        text += "\n0\n0\n3"
+        text += "  %.4f %.4f %.4f\n" %(v[0],v[1],v[2])
+        return text
+
+bpy.utils.register_class(BM_MAT_RAD_GLASS)

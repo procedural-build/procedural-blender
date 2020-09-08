@@ -1,9 +1,9 @@
 ###########################################################
-# Blender Modelling Environment for Architecture
-# Copyright (C) 2011, ods-engineering
-# License : ods-engineering license
+# Blender Addon for Procedural Cloud-based Design Tools
+# Copyright (C) 2020, Procedural (ApS) Denmark
+# License : procedural.build license
 # Version : 1.2
-# Web     : www.ods-engineering.com
+# Web     : www.procedural.build
 ###########################################################
 
 
@@ -13,7 +13,7 @@ from procedural_compute.core.utils.selectUtils import makeTuples
 
 def recalcsunpath(self, context):
     if hasattr(bpy.context.scene, 'ODS_SUN'):
-        bpy.context.scene.ODS_SUN.sunpath.recalc = True
+        bpy.context.scene.procedural_compute.sun.sunpath.recalc = True
     return None
 
 

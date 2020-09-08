@@ -1,9 +1,9 @@
 ###########################################################
-# Blender Modelling Environment for Architecture
+# Blender Addon for Procedural Cloud-based Design Tools
 # Copyright (C) 2011, ODS-Engineering
-# License : ods-engineering license
+# License : procedural.build license
 # Version : 1.2
-# Web     : www.ods-engineering.com
+# Web     : www.procedural.build
 ###########################################################
 
 import bpy
