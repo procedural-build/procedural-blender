@@ -9,6 +9,7 @@
 import bpy
 import procedural_compute.rad.properties.object
 
+
 class DATA_PT_light_bm(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
@@ -28,9 +29,13 @@ class DATA_PT_light_bm(bpy.types.Panel):
         # Main Menu Headings
         if len(bpy.types.BM_SCENE_ODS.mainMenu[1]['items']) > 0:
             layout.row().prop(sc.ODS, "mainMenu", expand=True)
+
         # Skip this menu if the mainMenu is not pointing to Radiance
         if sc.ODS.mainMenu != "Radiance":
             return
-        layout.row().prop_search(ob.RAD,"iesname",sc.procedural_compute.rad.Light,"iesLights", text="IES Light Type")
+
+        layout.row().prop_search(ob.RAD,"iesname",sc.RAD.Light,"iesLights", text="IES Light Type")
         return
+
+
 bpy.utils.register_class(DATA_PT_light_bm)

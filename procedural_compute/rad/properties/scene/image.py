@@ -10,6 +10,7 @@
 import bpy
 from procedural_compute.core.utils.selectUtils import makeTuples
 
+
 class imageprops(bpy.types.PropertyGroup):
     ndivs: bpy.props.IntProperty(name="n", description="Number of contours(=legend values)", default=8)
     decades: bpy.props.IntProperty(name="log", description="Log scaling factor", default=1)
@@ -43,7 +44,7 @@ class imageprops(bpy.types.PropertyGroup):
 
         layout.row().prop(self, "scale")
         layout.row().prop(self, "label")
-        
+
         layout.row().prop(self, "output")
         row = layout.row()
         row.operator("image.falsecolor", text="Make").command="falsecolor"
@@ -67,5 +68,6 @@ class imageprops(bpy.types.PropertyGroup):
 
     def getRadOptions(self):
         return ""
+
 
 bpy.utils.register_class(imageprops)

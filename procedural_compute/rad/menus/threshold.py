@@ -8,6 +8,7 @@
 
 import bpy
 
+
 class thresholdPanel(bpy.types.Panel):
     bl_space_type = "IMAGE_EDITOR"
     bl_region_type = "UI"
@@ -15,6 +16,8 @@ class thresholdPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        bpy.context.scene.procedural_compute.rad.falsecolor.drawThreshold(layout)
+        bpy.context.scene.RAD.falsecolor.drawThreshold(layout)
         return
+
+
 bpy.utils.register_class(thresholdPanel)

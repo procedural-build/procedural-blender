@@ -10,8 +10,8 @@
 import bpy
 
 import procedural_compute.rad.properties.material
-
 from procedural_compute.core.utils.blendmeUtils import drawCollectionTemplateList
+
 
 def drawBasic(self, context):
     layout = self.layout
@@ -26,6 +26,6 @@ def drawBasic(self, context):
         return
 
     layout.row().label(text="Outside->Inside = Top->Bottom")
-    mat.procedural_compute.rad.drawMenu(layout)
+    mat.RAD.drawMenu(layout)
 
     return

@@ -1,12 +1,14 @@
 ###########################################################
 # Blender Addon for Procedural Cloud-based Design Tools
-# Copyright (C) 2020, Procedural (ApS) Denmark
+# Copyright (C) 2011, ODS-Engineering
 # License : procedural.build license
 # Version : 1.2
 # Web     : www.procedural.build
 ###########################################################
 
 
-from .object import *
-from .scene import *
-from .material import *
+def drawBasic(self, context):
+    # Skip this menu if the mainMenu is not pointing to CFD
+    if context.scene.ODS.mainMenu != "Radiance":
+        return
+    context.object.RAD.drawMenu(self.layout)

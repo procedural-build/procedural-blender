@@ -12,11 +12,11 @@ import bpy
 from procedural_compute.core.utils.selectUtils import makeTuples
 from procedural_compute.rad.utils.radUtils import formatName
 
-from procedural_compute.rad.properties.material.plastic import BM_MAT_RAD_PLASTIC
-from procedural_compute.rad.properties.material.glass import BM_MAT_RAD_GLASS
-from procedural_compute.rad.properties.material.metal import BM_MAT_RAD_METAL
-from procedural_compute.rad.properties.material.mirror import BM_MAT_RAD_MIRROR
-from procedural_compute.rad.properties.material.trans import BM_MAT_RAD_TRANS
+from .plastic import BM_MAT_RAD_PLASTIC
+from .glass import BM_MAT_RAD_GLASS
+from .metal import BM_MAT_RAD_METAL
+from .mirror import BM_MAT_RAD_MIRROR
+from .trans import BM_MAT_RAD_TRANS
 
 class BM_MAT_RAD(bpy.types.PropertyGroup):
 
@@ -49,4 +49,4 @@ bpy.utils.register_class(BM_MAT_RAD)
 
 ##############
 # Point from Scene to ODS variables
-bpy.types.Material.RAD: bpy.props.PointerProperty(type=BM_MAT_RAD)
+bpy.types.Material.RAD = bpy.props.PointerProperty(type=BM_MAT_RAD)

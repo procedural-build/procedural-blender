@@ -24,8 +24,10 @@ from procedural_compute.sun.utils.suncalcs import Solar_Pos
 
 from math import floor
 
+
 def caseDir():
     return bpy.path.abspath(bpy.context.scene.procedural_compute.rad.caseDir)
+
 
 def getOutsideAmb(skyfile=None):
     sc = bpy.context.scene
@@ -51,6 +53,7 @@ def getOutsideAmb(skyfile=None):
     extamb = float(out)
     print("FOUND GROUND AMBIENT LEVEL = %f"%(extamb))
     return extamb
+
 
 # GENERIC RADIANCE OPERATORS
 class SCENE_OT_radianceOps(bpy.types.Operator):
@@ -100,5 +103,6 @@ class SCENE_OT_radianceOps(bpy.types.Operator):
         if not os.path.exists(dirpath):
             os.makedirs(dirpath)
         return None
+
 
 bpy.utils.register_class(SCENE_OT_radianceOps)

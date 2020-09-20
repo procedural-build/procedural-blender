@@ -171,6 +171,19 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
         # Transform and return the bounds
         return [bounding_box.matrix_world @ v for v in local_bounds]
 
+    def get_set_set(self, obj, keep_point=[0,0,0], locations=[True, True, False]):
+        return {
+            'name': foamUtils.formatObjectName(obj.name),
+            'locations': locations,
+            'keep_point': keep_point
+        }
+
+    def get_set_sets(self):
+        keep_point = self.get_unique_object('cfdMeshKeepPoint')
+        keep_point_co = [co for co in keep_point.location]
+        set_set_objs = [o for o in bpy.context.visible_objects if o.ODS_CFD.mesh.makeCellSet]
+        return [self.get_set_set(obj, keep_point=keep_point_co) for obj in set_set_objs]
+
     def domain_json(self):
         global_bounds = self.get_bounds()
 
@@ -185,14 +198,18 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
             'parameters': {
                 'square': True,
                 'z0': True
-            }
+            },
+            "set_set_regions": self.get_set_sets()
         }
 
         return json_dict
 
-    def snappy_json(self):
+    def exclude_object(self, obj):
         special_names = ['cfdBoundingBox','cfdMeshKeepPoint', 'MinX', 'MaxX', 'MinY', 'MaxY', 'MinZ', 'MaxZ']
-        objects = [o for o in bpy.context.visible_objects if (not o.ODS_CFD.mesh.makeRefinementRegion) and (not o.name.split('.')[0] in special_names)]
+        return (obj.ODS_CFD.mesh.makeRefinementRegion or obj.ODS_CFD.mesh.makeCellSet) or (obj.name.split('.')[0] in special_names)
+
+    def snappy_json(self):
+        objects = [o for o in bpy.context.visible_objects if not self.exclude_object(o)]
 
         # Make a dictionary for default surface properties
         default_surface_dict = {

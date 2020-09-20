@@ -11,23 +11,27 @@ import bpy
 from procedural_compute.core.utils.selectUtils import makeTuples
 from procedural_compute.core.utils import threads
 
-from procedural_compute.rad.properties.scene.frame import BM_SCENE_RAD_FRAME
-from procedural_compute.rad.properties.scene.image import imageprops
+from .frame import BM_SCENE_RAD_FRAME
+from .light import BM_SCENE_RAD_LIGHT
+from .stencil import BM_SCENE_RAD_STENCIL
+from .image import imageprops
+
 
 def setQueue(self, context):
     threads.queues["rpict"].maxsize = self.nproc
     return None
 
+
 class BM_SCENE_RAD(bpy.types.PropertyGroup):
 
     falsecolor: bpy.props.PointerProperty(type=imageprops)
     Frame: bpy.props.PointerProperty(type=BM_SCENE_RAD_FRAME)
+    Light: bpy.props.PointerProperty(type=BM_SCENE_RAD_LIGHT)
+    Stencil: bpy.props.PointerProperty(type=BM_SCENE_RAD_STENCIL)
 
     items_list = [
       ("Frame",     "Frame",    "Render Current Frame"),
       ("Light",     "Light",    "Set IES Lights"),
-      ("Frame",     "Frame",    "Render Current Frame"),
-      ("Sequence",  "Sequence", "Render Sequence"),
       ("Stencil",   "Stencil",  "Render Stencils")
     ]
     menu: bpy.props.EnumProperty(name="RADMenu", items=items_list, description="Radiance menu", default="Frame")
@@ -45,7 +49,7 @@ class BM_SCENE_RAD(bpy.types.PropertyGroup):
 
     def draw(self, layout):
         layout.row().prop(self, "menu", expand=True)
-        split = layout.split(0.25)
+        split = layout.split(factor=0.25)
         split.column().prop(self, "nproc", text="CPUs")
         split.column().prop(self, "caseDir", text="Case Dir")
         getattr(self, self.menu).drawButtons(layout)
@@ -63,4 +67,4 @@ bpy.utils.register_class(BM_SCENE_RAD)
 
 ##############
 # Point from Scene to ODS variables
-bpy.types.Scene.RAD: bpy.props.PointerProperty(type=BM_SCENE_RAD)
+bpy.types.Scene.RAD = bpy.props.PointerProperty(type=BM_SCENE_RAD)

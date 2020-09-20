@@ -8,3 +8,7 @@
 
 from .ops import *
 from .imageproc import *
+from .batchstats import *
+from .rtracestencils import *
+from .sequence import *
+from .writeYearRays import *

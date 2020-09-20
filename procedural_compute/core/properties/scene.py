@@ -21,7 +21,6 @@ class BM_SCENE_ODS(bpy.types.PropertyGroup):
     )
 
 
-print("Registering scene properties")
 bpy.utils.register_class(BM_SCENE_ODS)
 
 ##############

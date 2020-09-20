@@ -61,4 +61,4 @@ bpy.utils.register_class(BM_SCENE_SUN)
 
 ##############
 # Point from Scene to ODS variables
-bpy.types.Scene.ODS_SUN: bpy.props.PointerProperty(type=BM_SCENE_SUN)
+bpy.types.Scene.ODS_SUN = bpy.props.PointerProperty(type=BM_SCENE_SUN)

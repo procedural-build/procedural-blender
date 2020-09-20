@@ -8,12 +8,15 @@
 
 import bpy
 
+
 class falsecolorPanel(bpy.types.Panel):
     bl_space_type = "IMAGE_EDITOR"
     bl_region_type = "UI"
     bl_label = "Falsecolor"
 
     def draw(self, context):
-        bpy.context.scene.procedural_compute.rad.falsecolor.draw(self.layout)
+        bpy.context.scene.RAD.falsecolor.draw(self.layout)
         return None
+
+
 bpy.utils.register_class(falsecolorPanel)

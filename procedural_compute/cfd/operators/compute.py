@@ -278,6 +278,18 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             project_id, 'mesh', task_id, dependent_on=setup_task['uid']
         )
 
+        commands = [
+            'blockMesh',
+            "snappyHexMesh -overwrite",
+            "reconstructParMesh -constant -mergeTol 1e-6",
+            "!checkMesh -writeSets vtk",
+            "foamToSurface -constant surfaceMesh.obj"
+        ]
+
+        cellset_objects = [obj for obj in bpy.context.visible_objects if obj.ODS_CFD.mesh.makeCellSet]
+        if len(cellset_objects) > 0:
+            commands.append("!setSet -batch zones.setSet")
+
         # Get or create the mesh task
         mesh_task = GenericViewSet(
             f'/api/project/{project_id}/task/'
@@ -289,13 +301,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
                     'task_type': 'cfd',
                     'cmd': 'pipeline',
                     'cpus': [i for i in system_settings.decompN],
-                    'commands': [
-                        'blockMesh',
-                        "snappyHexMesh -overwrite",
-                        "reconstructParMesh -constant -mergeTol 1e-6",
-                        "!checkMesh -writeSets vtk",
-                        "foamToSurface -constant surfaceMesh.obj"
-                    ]
+                    'commands': commands
                 }
             }
         )
@@ -426,16 +432,18 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             project_id, 'PostProcess', task_id
         )
 
+        fields = [i.strip() for i in postproc_properties.probe_fields.split(',')]
+
         config = {
             'task_type': 'cfd',
             "cmd": "pipeline",
-            "case_dir": "VWT/",
+            "case_dir": f"{postproc_properties.task_case_dir}/",
             "cpus": [1, 1, 1],
             "commands": [
                 "write_sample_set",
                 "!postProcess -func internalCloud"
             ],
-            "fields": ["Utrans", "p"],
+            "fields": fields,
             "sets": get_sets_from_selected()
         }
 
@@ -469,12 +477,12 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         first_object = bpy.context.selected_objects[0]
         base_url = f"/api/task/{task_id}/file"  # {system_settings.host}
-        file_url = f"{base_url}/VWT/postProcessing/internalCloud/0.0/{first_object.name}_Utrans.xy/"
+        file_url = f"{base_url}/{postproc_properties.task_case_dir}/postProcessing/internalCloud/{postproc_properties.probe_time_dir}/{first_object.name}_{postproc_properties.load_probe_field}.xy/"
 
         def handle_probe_data(data):
             lines = data.splitlines()
             print(f"GOT DATA FOR {file_url}. Lines: {len(lines)}.  Applying to object: {first_object.name}")
-            color_object(first_object, lines, scale=[0, 5])
+            color_object(first_object, lines, scale=[postproc_properties.probe_min_range, postproc_properties.probe_max_range])
 
         print(f"Waiting for file from url: {file_url}")
         fetch_async(file_url, callback=handle_probe_data, timeout=30, query_params={'download': 'true'})

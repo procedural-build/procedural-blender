@@ -15,11 +15,9 @@ from procedural_compute.sun.utils.timeFrameSync import frameToTime
 import procedural_compute.rad.properties.scene
 from procedural_compute.core.utils.blendmeUtils import drawCollectionTemplateList
 
-def drawBasic(self, context):
-    layout = self.layout
-    sc = context.scene
 
-    # Skip this menu if the mainMenu is not pointing to CFD
-    if sc.ODS.mainMenu != "Radiance":
+def drawBasic(self, context):
+    # Skip this menu if the mainMenu is not pointing to Radiance
+    if context.scene.ODS.mainMenu != "Radiance":
         return
-    sc.RAD.draw(layout)
+    context.scene.RAD.draw(self.layout)

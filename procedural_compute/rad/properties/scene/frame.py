@@ -9,6 +9,7 @@
 import bpy
 from procedural_compute.core.utils.selectUtils import makeTuples
 
+
 class BM_SCENE_RAD_FRAME(bpy.types.PropertyGroup):
 
     items_list = makeTuples(["low","medium","high"])
@@ -34,11 +35,11 @@ class BM_SCENE_RAD_FRAME(bpy.types.PropertyGroup):
         split = layout.split()
         split.column().operator("scene.radianceops", text="Write Case Files").command="writeRadianceFiles"
         split.column().operator("scene.radianceops", text="Render Frame").command="executeRifFile"
-    
+
     def draw(self, layout):
         L = layout.box()
         L.row().label(text="Radiance Output Options:")
-      
+
         split = L.split()
         split.column().prop(self, "imagesize")
         split.column().prop(self, "indirect")
@@ -51,7 +52,7 @@ class BM_SCENE_RAD_FRAME(bpy.types.PropertyGroup):
         col = split.column()
         col.prop(self, "detail", expand=False)
         col.prop(self, "penumbras")
-        
+
         L = layout.box()
         L.row().prop(self, "zoneType", expand=False)
         L.row().prop(self, "zoneMin", text="zoneMin")
@@ -76,5 +77,6 @@ class BM_SCENE_RAD_FRAME(bpy.types.PropertyGroup):
         text += "\nUP=           Z\n"
         text += "\nrender=     \n"
         return text
+
 
 bpy.utils.register_class(BM_SCENE_RAD_FRAME)

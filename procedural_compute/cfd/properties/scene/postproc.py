@@ -17,6 +17,11 @@ class BM_SCENE_CFDPostProc(bpy.types.PropertyGroup):
     # Server login and token properties
     task_case_dir: bpy.props.StringProperty(name="Task case_dir", default='foam', description="Task case_dir (on server)")
     auto_load_probes: bpy.props.BoolProperty(default=True)
+    probe_time_dir: bpy.props.StringProperty(name="Probe time dir", default='0.0', description="The time folder to load probe results")
+    probe_fields: bpy.props.StringProperty(name="Probe fields", default='Utrans,p', description="Probe these fields")
+    load_probe_field: bpy.props.StringProperty(name="Load probe field", default='Utrans', description="Load these fields from the probes")
+    probe_min_range: bpy.props.FloatProperty(name="Probe Min Range", default=0.0, description="Probe Min Range")
+    probe_max_range: bpy.props.FloatProperty(name="Probe Max Range", default=5.0, description="Probe Max Range")
 
 
     def drawMenu(self, layout):
@@ -25,7 +30,15 @@ class BM_SCENE_CFDPostProc(bpy.types.PropertyGroup):
 
         # Probe points - probe points and wait for result
         box = layout.box()
-        box.row().prop(self, "task_case_dir")
+        row = box.row()
+        row.prop(self, "task_case_dir")
+        row.prop(self, "probe_time_dir")
+        row = box.row()
+        row.prop(self, "probe_fields")
+        row.prop(self, "load_probe_field")
+        row = box.row()
+        row.prop(self, "probe_min_range")
+        row.prop(self, "probe_max_range")
         row = box.row()
         row.operator("scene.compute_cfdoperators", text="Probe Selected", ).command = "probe_selected"
         row.prop(self, "auto_load_probes", text="Auto Load")

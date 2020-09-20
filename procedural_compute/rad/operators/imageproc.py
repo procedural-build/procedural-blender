@@ -10,8 +10,9 @@ import bpy
 import os
 from math import floor
 
-#from procedural_compute.core.utils.subprocesses import waitOUTPUT
+from procedural_compute.core.utils.subprocesses import waitOUTPUT
 from procedural_compute.rad.operators.ops import getOutsideAmb
+
 
 class imageops(bpy.types.Operator):
     bl_label = "falsecolor"
@@ -314,5 +315,6 @@ ba = bi(nfiles);
 """)
         f.close()
         return
+
 
 bpy.utils.register_class(imageops)

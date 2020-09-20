@@ -10,22 +10,27 @@
 import bpy
 
 import procedural_compute.rad.menus as menus
-import procedural_compute.rad.menus.scene as sceneMenu
-import procedural_compute.rad.menus.material as materialMenu
+
+from procedural_compute.rad.menus.scene import drawBasic as drawSceneMenu
+from procedural_compute.rad.menus.object import drawBasic as drawObjectMenu
+from procedural_compute.rad.menus.material import drawBasic as drawMaterialMenu
 
 import procedural_compute.rad.properties as properties
 import procedural_compute.rad.operators as operators
 
 
 def register():
-    bpy.types.SCENE_PT_bm.append(sceneMenu.drawBasic)
-    bpy.types.MATERIAL_PT_bm.append(materialMenu.drawBasic)
+    bpy.types.SCENE_PT_bm.append(drawSceneMenu)
+    bpy.types.OBJECT_PT_bm.append(drawObjectMenu)
+    bpy.types.MATERIAL_PT_bm.append(drawMaterialMenu)
     return
 
 def unregister():
     bpy.utils.unregister_class(menus.camera.DATA_PT_camera_bm)
     bpy.utils.unregister_class(menus.falsecolour.falsecolorPanel)
     bpy.utils.unregister_class(menus.threshold.thresholdPanel)
-    bpy.types.SCENE_PT_bm.remove(sceneMenu)
-    bpy.types.MATERIAL_PT_bm.remove(materialMenu)
+
+    bpy.types.SCENE_PT_bm.remove(drawSceneMenu)
+    bpy.types.OBJECT_PT_bm.remove(drawObjectMenu)
+    bpy.types.MATERIAL_PT_bm.remove(drawMaterialMenu)
     return
