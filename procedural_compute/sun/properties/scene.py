@@ -11,7 +11,7 @@ import bpy
 
 
 def recalcsunpath(self, context):
-    bpy.context.scene.procedural_compute.sun.sunpath.recalc = True
+    bpy.context.scene.ODS_SUN.sunpath.recalc = True
     return None
 
 

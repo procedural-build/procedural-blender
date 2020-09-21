@@ -37,7 +37,7 @@ class BM_SCENE_RAD_STENCIL(bpy.types.PropertyGroup):
         col.prop(self, "ambD")
 
     def getRadOptions(self):
-        return bpy.context.scene.procedural_compute.rad.Frame.getRadOptions()
+        return bpy.context.scene.RAD.Frame.getRadOptions()
 
 
 bpy.utils.register_class(BM_SCENE_RAD_STENCIL)

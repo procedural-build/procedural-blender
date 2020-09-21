@@ -17,13 +17,13 @@ class BM_MAT_RAD_GLASS(bpy.types.PropertyGroup):
         name="visibleTransmittance",
         description="Visible Transmittance at Normal Incidence",
         default=0.881, min=0.0, max=1.0, precision=4)
-    
+
     def drawMenu(self, layout):
         layout.row().prop(self, "transmittance")
 
     def getMatRGB(self):
         m = self.id_data
-        (r,g,b) = m.diffuse_color * m.diffuse_intensity
+        (r,g,b,a) = m.diffuse_color
         return (r,g,b)
 
     def transmissivity(self):
@@ -42,7 +42,7 @@ class BM_MAT_RAD_GLASS(bpy.types.PropertyGroup):
                 vc = 1.0
             v.append(vc)
         return v
-    
+
     def textRAD(self):
         v = self.rgbFactors()
         text = "\n## material conversion from blender \"diffuse_color\" property"

@@ -13,7 +13,7 @@ from procedural_compute.core.utils.selectUtils import makeTuples
 
 def recalcsunpath(self, context):
     if hasattr(bpy.context.scene, 'ODS_SUN'):
-        bpy.context.scene.procedural_compute.sun.sunpath.recalc = True
+        bpy.context.scene.ODS_SUN.sunpath.recalc = True
     return None
 
 

@@ -24,7 +24,7 @@ class RadianceSky(ExportBase):
         az = az + degrees(sc.Site.northAxis)
         text = "!gensky -ang %.3f %.3f "%(el, az+180.0)
 
-        text += " %s -g 0.2 -t 1.7\n"%(sc.procedural_compute.rad.skytype)
+        text += " %s -g 0.2 -t 1.7\n"%(sc.RAD.skytype)
         text += "skyfunc glow skyglow\n0\n0\n4 0.9 0.9 1.15 0\n"
         text += "skyglow source sky\n0\n0\n4 0 0 1 180\n\n"
         text += "skyfunc glow groundglow\n0\n0\n4 1.4 0.9 0.6 0\n"

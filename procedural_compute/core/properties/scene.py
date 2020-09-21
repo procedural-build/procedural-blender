@@ -16,7 +16,7 @@ from procedural_compute.core.utils.selectUtils import makeTuples
 class BM_SCENE_ODS(bpy.types.PropertyGroup):
     mainMenu: bpy.props.EnumProperty(
         name="mainMenu",
-        items=makeTuples(["CFD", "Radiance", "Energy"]),
+        items=makeTuples(["SunPath", "CFD", "Radiance", "Energy"]),
         description="Procedural Compute menu categories"
     )
 

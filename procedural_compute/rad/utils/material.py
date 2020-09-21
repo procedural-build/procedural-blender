@@ -20,7 +20,7 @@ class MaterialContext(ExportBase):
         blue    = [0.180464, 0.0721856, 0.950444]
         self.matrix = [red,green,blue]
         return None
-    
+
     def export(self, materialsList, filename=''):
         # Write the default material to start with
         text = "## materials.rad\n"
@@ -38,7 +38,7 @@ class MaterialContext(ExportBase):
         if material == None:
             text = self.defaultMaterialText()
         else:
-            text = material.procedural_compute.rad.textRAD()
+            text = material.RAD.textRAD()
         return text
 
     def defaultMaterialText(self):

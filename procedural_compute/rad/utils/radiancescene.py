@@ -81,6 +81,6 @@ class RadianceScene(ExportBase):
         return "%s.rif"%(timestamp)
 
     def getRadOptions(self):
-        return bpy.context.scene.procedural_compute.rad.getRadOptions()
+        return bpy.context.scene.RAD.getRadOptions()
 
 

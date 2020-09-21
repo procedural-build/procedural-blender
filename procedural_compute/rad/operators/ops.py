@@ -12,8 +12,8 @@ import os
 import glob
 import threading
 
-#from procedural_compute.core.utils import threads
-#from procedural_compute.core.utils.subprocesses import waitSTDOUT, waitOUTPUT
+from procedural_compute.core.utils.threads import queue_fun
+from procedural_compute.core.utils.subprocesses import waitSTDOUT, waitOUTPUT
 
 from procedural_compute.rad.utils.radiancescene import RadianceScene
 from procedural_compute.sun.utils.timeFrameSync import getTimeStamp
@@ -26,7 +26,7 @@ from math import floor
 
 
 def caseDir():
-    return bpy.path.abspath(bpy.context.scene.procedural_compute.rad.caseDir)
+    return bpy.path.abspath(bpy.context.scene.RAD.caseDir)
 
 
 def getOutsideAmb(skyfile=None):
@@ -78,7 +78,6 @@ class SCENE_OT_radianceOps(bpy.types.Operator):
         print("Writing Radiance Files for Current Frame...")
         sc = bpy.context.scene
         frame  = sc.frame_current
-        #b = sc.ODS_SUN
         (hour, minute) = frameToTime(frame)
         RadianceScene().exportFrame(hour, minute)
         print("Done")
@@ -86,15 +85,15 @@ class SCENE_OT_radianceOps(bpy.types.Operator):
 
     def executeRifFile(self):
         sc = bpy.context.scene
-        cmd = "rad -N %i %s.rif"%(sc.procedural_compute.rad.nproc, getTimeStamp())
-        threads.queue_fun("rpict", waitSTDOUT, (cmd, caseDir()))
+        cmd = "rad -N %i %s.rif"%(sc.RAD.nproc, getTimeStamp())
+        queue_fun("rpict", waitSTDOUT, (cmd, caseDir()))
         getOutsideAmb()
         return{'FINISHED'}
 
     def genOctree(self):
         ts = getTimeStamp()
         cmd = "oconv %s.rad > octrees/%s.oct"%(ts, ts)
-        threads.queue_fun("rtrace", waitSTDOUT, (cmd, caseDir()))
+        queue_fun("rtrace", waitSTDOUT, (cmd, caseDir()))
 
     def getFilename(self,s):
         return "%s/%s"%(caseDir(),s)

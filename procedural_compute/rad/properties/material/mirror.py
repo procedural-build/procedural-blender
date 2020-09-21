@@ -25,7 +25,7 @@ class BM_MAT_RAD_MIRROR(bpy.types.PropertyGroup):
 
     def getMatRGB(self):
         m = self.id_data
-        (r,g,b) = m.diffuse_color * m.diffuse_intensity
+        (r,g,b,a) = m.diffuse_color
         return (r,g,b)
 
     def rgbFactors(self):
@@ -38,7 +38,7 @@ class BM_MAT_RAD_MIRROR(bpy.types.PropertyGroup):
                 vc = 1.0
             v.append(vc)
         return v
-    
+
     def textRAD(self):
         v = self.rgbFactors()
         text = "\n## material conversion from blender \"diffuse_color\" property"

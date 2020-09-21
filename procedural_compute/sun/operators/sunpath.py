@@ -23,7 +23,7 @@ def draw_sunpath_callback(self, context):
 
     def drawLine(points, loop=False, color=(0.1, 0.4, 0.8, 0.8), thickness=2):
         bgl.glLineWidth(thickness)
-        bgl.glColor4f(color[0], color[1], color[2], color[3])
+        bgl.glBlendColor(color[0], color[1], color[2], color[3])
         bgl.glBegin(bgl.GL_LINE_STRIP)
         for p in points:
             bgl.glVertex3f(p[0], p[1], p[2])
@@ -46,8 +46,8 @@ def draw_sunpath_callback(self, context):
             for T in range(dt):
                 Minute = T*(60/dt)
                 (Az, El) = Solar_Pos(Long, Lat, TimeZone, Month, Day, Hour, Minute)
-                if context.scene.procedural_compute.sun.sunpath.flat:
-                    if context.scene.procedural_compute.sun.sunpath.equi:
+                if sc.ODS_SUN.sunpath.flat:
+                    if sc.ODS_SUN.sunpath.equi:
                         coords[i] = azElToPolar(radians(Az)+N, radians(El))
                     else:
                         coords[i] = azElToXYZ(radians(Az)+N, radians(El))
@@ -56,7 +56,7 @@ def draw_sunpath_callback(self, context):
                     coords[i] = azElToXYZ(radians(Az)+N, radians(El))
                 # Finally shift the coordinate to the offset centre
                 for j in range(3):
-                    coords[i][j] += context.scene.procedural_compute.sun.sunpath.pos[j]
+                    coords[i][j] += sc.ODS_SUN.sunpath.pos[j]
                 i += 1
         return coords
 
@@ -65,14 +65,14 @@ def draw_sunpath_callback(self, context):
             X = sin(ang); Y = cos(ang);
             return [(R*X+O[0], R*Y+O[1], O[2]), (R*f*X+O[0], R*f*Y+O[1], O[2])]
         sc = bpy.context.scene
-        R = sc.procedural_compute.sun.arcRadius
+        R = sc.ODS_SUN.arcRadius
         N = sc.Site.northAxis
-        O = context.scene.procedural_compute.sun.sunpath.pos
+        O = sc.ODS_SUN.sunpath.pos
         T = [N+(i*2*pi/360) for i in range(360)]
         # Draw inner concentric circles
-        if sc.procedural_compute.sun.sunpath.circles:
+        if sc.ODS_SUN.sunpath.circles:
             for i in range(1,9):
-                if sc.procedural_compute.sun.sunpath.flat and sc.procedural_compute.sun.sunpath.equi:
+                if sc.ODS_SUN.sunpath.flat and sc.ODS_SUN.sunpath.equi:
                     r = (i*R/9)
                 else:
                     r = R*sin((pi/2)*(i/9))
@@ -89,7 +89,7 @@ def draw_sunpath_callback(self, context):
         for i in range(36):
             T = N+(i*2*pi/36)
             drawLine(tick(T,1.05), color=color)
-        return 
+        return
 
     def calcSunPath():
         datum = datetime.datetime(2010,1,1)
@@ -102,7 +102,7 @@ def draw_sunpath_callback(self, context):
         for i in range(0,24):
             loops[i] = [points[day][i*4] for day in range(365)]
         return None
-    
+
     def getTextLocation():
         context = bpy.context
         scene = bpy.context.scene
@@ -117,7 +117,7 @@ def draw_sunpath_callback(self, context):
         blf.size(0, font_size, 72)
         (pos_x, pos_y) = getTextLocation()
         blf.position(0, pos_x, pos_y , 0)
-        bgl.glColor4f(r, g, b, alpha)
+        bgl.glBlendColor(r, g, b, alpha)
         (hour,minute) = frameToTime(bpy.context.scene.frame_current)
         if hour >= 24:
             minute = 0
@@ -133,10 +133,10 @@ def draw_sunpath_callback(self, context):
         return None
 
     # Draw the time
-    if bpy.context.scene.procedural_compute.sun.sunpath.time:
+    if bpy.context.scene.ODS_SUN.sunpath.time:
         drawTime()
-    
-    if not bpy.context.scene.procedural_compute.sun.sunpath.path:
+
+    if not bpy.context.scene.ODS_SUN.sunpath.path:
         return None
 
     # Get & convert the Perspective Matrix of the current view/region.
@@ -151,12 +151,12 @@ def draw_sunpath_callback(self, context):
     # Store previous OpenGL settings.
     # Store MatrixMode
     MatrixMode_prev = bgl.Buffer(bgl.GL_INT, [1])
-    bgl.glGetIntegerv(bgl.GL_MATRIX_MODE, MatrixMode_prev)
+    bgl.glGetIntegerv(2976, MatrixMode_prev)  # bgl.GL_MATRIX_MODE
     MatrixMode_prev = MatrixMode_prev[0]
 
     # Store projection matrix
     ProjMatrix_prev = bgl.Buffer(bgl.GL_DOUBLE, [16])
-    bgl.glGetFloatv(bgl.GL_PROJECTION_MATRIX, ProjMatrix_prev)
+    bgl.glGetFloatv(2983, ProjMatrix_prev)  # bgl.GL_PROJECTION_MATRIX
 
     # Store Line width
     lineWidth_prev = bgl.Buffer(bgl.GL_FLOAT, [1])
@@ -169,7 +169,7 @@ def draw_sunpath_callback(self, context):
     blend_prev = blend_prev[0]
 
     line_stipple_prev = bgl.Buffer(bgl.GL_BYTE, [1])
-    bgl.glGetFloatv(bgl.GL_LINE_STIPPLE, line_stipple_prev)
+    bgl.glGetFloatv(2852, line_stipple_prev)  # bgl.GL_LINE_STIPPLE
     line_stipple_prev = line_stipple_prev[0]
 
     # Store glColor4f
@@ -179,26 +179,26 @@ def draw_sunpath_callback(self, context):
     # ---
     # Prepare for 3D drawing
     bgl.glLoadIdentity()
-    bgl.glMatrixMode(bgl.GL_PROJECTION)
+    bgl.glMatrixMode(5889)  # bgl.GL_PROJECTION
     bgl.glLoadMatrixf(perspBuff)
 
     bgl.glEnable(bgl.GL_BLEND)
     bgl.glEnable(bgl.GL_LINE_SMOOTH)
     #bgl.glEnable(bgl.GL_LINE_STIPPLE)
-    if not bpy.context.scene.procedural_compute.sun.sunpath.xray:
+    if not bpy.context.scene.ODS_SUN.sunpath.xray:
         bgl.glEnable(bgl.GL_DEPTH_TEST)
-    
+
     # Draw the day sunpath lines
-    if bpy.context.scene.procedural_compute.sun.sunpath.recalc:
+    if bpy.context.scene.ODS_SUN.sunpath.recalc:
         calcSunPath()
         drawSunPath()
-        bpy.context.scene.procedural_compute.sun.sunpath.recalc = False
+        bpy.context.scene.ODS_SUN.sunpath.recalc = False
     else:
         drawSunPath()
 
     # ---
     # Restore previous OpenGL settings
-    if not bpy.context.scene.procedural_compute.sun.sunpath.xray:
+    if not bpy.context.scene.ODS_SUN.sunpath.xray:
         bgl.glDisable(bgl.GL_DEPTH_TEST)
     bgl.glLoadIdentity()
     bgl.glMatrixMode(MatrixMode_prev)
@@ -207,8 +207,8 @@ def draw_sunpath_callback(self, context):
     if not blend_prev:
         bgl.glDisable(bgl.GL_BLEND)
     if not line_stipple_prev:
-        bgl.glDisable(bgl.GL_LINE_STIPPLE)
-    bgl.glColor4f(
+        bgl.glDisable(2852)  # bgl.GL_LINE_STIPPLE
+    bgl.glBlendColor(
         color_prev[0],
         color_prev[1],
         color_prev[2],
@@ -229,15 +229,15 @@ class VIEW3D_OT_display_sunpath(bpy.types.Operator):
         if event.type == 'TIMER':
             # no input, so no need to change the display
             return {'PASS_THROUGH'}
-        if not context.scene.procedural_compute.sun.sunpath.draw:
+        if not context.scene.ODS_SUN.sunpath.draw:
             context.region.callback_remove(self._handle)
             return {'CANCELLED'}
         return {'PASS_THROUGH'}
 
     def invoke(self, context, event):
-        draw = context.scene.procedural_compute.sun.sunpath.draw
-        context.scene.procedural_compute.sun.sunpath.draw = not draw
-        if not context.scene.procedural_compute.sun.sunpath.draw:
+        draw = context.scene.ODS_SUN.sunpath.draw
+        context.scene.ODS_SUN.sunpath.draw = not draw
+        if not context.scene.ODS_SUN.sunpath.draw:
             print("returning cancelled")
             return {'CANCELLED'}
         return self.execute(context)
@@ -250,10 +250,12 @@ class VIEW3D_OT_display_sunpath(bpy.types.Operator):
                 for WINregion in context.area.regions:
                     if WINregion.type == 'WINDOW':
                         context.window_manager.modal_handler_add(self)
-                        self._handle = WINregion.callback_add(
+                        self._handle = bpy.types.SpaceView3D.draw_handler_add(
                             draw_sunpath_callback,
                             (self, context),
-                            'POST_PIXEL')
+                            'WINDOW',
+                            'POST_PIXEL'
+                        )
                         print("Sunpath display callback added")
                         return {'RUNNING_MODAL'}
             return {'CANCELLED'}
@@ -282,27 +284,27 @@ class VIEW3D_PT_sunpath(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        sce = context.scene
+        sc = context.scene
 
-        if context.scene.procedural_compute.sun.sunpath.draw:
+        if sc.ODS_SUN.sunpath.draw:
             layout.operator("view3d.display_sunpath", text="Stop Drawing")
         else:
             layout.operator("view3d.display_sunpath", text="Draw")
             return None
 
         row = layout.row()
-        row.prop(context.scene.procedural_compute.sun.sunpath, "time", text="Show time")
-        row.prop(context.scene.procedural_compute.sun.sunpath, "path", text="Sun Path")
-        if context.scene.procedural_compute.sun.sunpath.path:
+        row.prop(sc.ODS_SUN.sunpath, "time", text="Show time")
+        row.prop(sc.ODS_SUN.sunpath, "path", text="Sun Path")
+        if sc.ODS_SUN.sunpath.path:
             row = layout.row()
-            row.prop(context.scene.procedural_compute.sun.sunpath, "flat", text="Flatten")
-            row.prop(context.scene.procedural_compute.sun.sunpath, "xray", text="Over")
+            row.prop(sc.ODS_SUN.sunpath, "flat", text="Flatten")
+            row.prop(sc.ODS_SUN.sunpath, "xray", text="Over")
             row = layout.row()
-            row.prop(context.scene.procedural_compute.sun.sunpath, "circles", text="Circles")
-            if context.scene.procedural_compute.sun.sunpath.flat:
-                row.prop(context.scene.procedural_compute.sun.sunpath, "equi", text="Equidistant")
-        layout.row().prop(context.scene.ODS_SUN, "arcRadius", text="Radius")
-        layout.row().prop(context.scene.procedural_compute.sun.sunpath, "pos", text="")
+            row.prop(sc.ODS_SUN.sunpath, "circles", text="Circles")
+            if sc.ODS_SUN.sunpath.flat:
+                row.prop(sc.ODS_SUN.sunpath, "equi", text="Equidistant")
+        layout.row().prop(sc.ODS_SUN, "arcRadius", text="Radius")
+        layout.row().prop(sc.ODS_SUN.sunpath, "pos", text="")
 
         return None
 bpy.utils.register_class(VIEW3D_PT_sunpath)

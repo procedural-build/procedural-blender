@@ -30,7 +30,7 @@ class BM_MAT_RAD_PLASTIC(bpy.types.PropertyGroup):
 
     def getMatRGB(self):
         m = self.id_data
-        (r,g,b) = m.diffuse_color * m.diffuse_intensity
+        (r,g,b,a) = m.diffuse_color
         return (r,g,b)
 
     def roughValue(self):
@@ -48,4 +48,3 @@ class BM_MAT_RAD_PLASTIC(bpy.types.PropertyGroup):
         return text
 
 bpy.utils.register_class(BM_MAT_RAD_PLASTIC)
-

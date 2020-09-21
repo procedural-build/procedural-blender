@@ -10,7 +10,7 @@
 import bpy
 
 from procedural_compute.core.utils.selectUtils import makeTuples
-from procedural_compute.rad.utils.radUtils import formatName    
+from procedural_compute.rad.utils.radUtils import formatName
 
 
 class BM_MAT_RAD_METAL(bpy.types.PropertyGroup):
@@ -31,7 +31,7 @@ class BM_MAT_RAD_METAL(bpy.types.PropertyGroup):
 
     def getMatRGB(self):
         m = self.id_data
-        (r,g,b) = m.diffuse_color * m.diffuse_intensity
+        (r,g,b,a) = m.diffuse_color
         return (r,g,b)
 
     def roughValue(self):

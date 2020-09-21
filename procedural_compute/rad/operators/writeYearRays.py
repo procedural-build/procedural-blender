@@ -49,7 +49,7 @@ class SCENE_OT_writeYearRays(bpy.types.Operator):
             cmd += " | rtrace -ab 0 -h+ -ov -fac -x %u -y %u octrees/%s.oct "%(nFrames,nDays,timestamp)
             cmd += " | pfilt -h 20 -n 0 -p 1 -r 1 > images/yearTrace_temp.hdr "
             cmd += " && protate images/yearTrace_temp.hdr images/yearTrace_%s.hdr && rm -v images/yearTrace_temp.hdr"%(o.name)
-            threads.queue_fun("rtrace", waitSTDOUT, (cmd, caseDir()))
+            queue_fun("rtrace", waitSTDOUT, (cmd, caseDir()))
         return
 
     def writeYearRays(self):

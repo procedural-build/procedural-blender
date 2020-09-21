@@ -20,16 +20,16 @@ class BM_MAT_RAD_TRANS(bpy.types.PropertyGroup):
         description="Influences only External Convection Coefficients",
         default="MediumRough")
     specular: bpy.props.FloatProperty(
-        name="Specularity", 
+        name="Specularity",
         description="Specularity (>0.1 is usually not realistic for Opaque, >0.9 typical for metal)",
         default=0.0, min=0.0, max=1.0, precision=4)
     transmittance: bpy.props.FloatProperty(
-        name="visibleTransmittance", 
-        description="Visible Transmittance at Normal Incidence", 
+        name="visibleTransmittance",
+        description="Visible Transmittance at Normal Incidence",
         default=0.5, min=0.0, max=1.0, precision=4)
     tSpec: bpy.props.FloatProperty(
-        name="tSpec", 
-        description="Transmitted Specularity", 
+        name="tSpec",
+        description="Transmitted Specularity",
         default=0.5, min=0.0, max=1.0, precision=4)
 
     def drawMenu(self, layout):
@@ -42,7 +42,7 @@ class BM_MAT_RAD_TRANS(bpy.types.PropertyGroup):
 
     def getMatRGB(self):
         m = self.id_data
-        (r,g,b) = m.diffuse_color * m.diffuse_intensity
+        (r,g,b,a) = m.diffuse_color
         return (r,g,b)
 
     def roughValue(self):

@@ -41,16 +41,16 @@ Check that skyfile exists for current frame(time).\n \
 Using default value of 20. Results will not be accurate.')
             extamb = 20
         sc = context.scene
-        sc.procedural_compute.rad.falsecolor.mult = (100/3.14159265358979)/extamb
-        sc.procedural_compute.rad.falsecolor.label = "DF"
+        sc.RAD.falsecolor.mult = (100/3.14159265358979)/extamb
+        sc.RAD.falsecolor.label = "DF"
         return{'FINISHED'}
 
     def threshold(self, context):
         sc = context.scene
-        p = sc.procedural_compute.rad.falsecolor
+        p = sc.RAD.falsecolor
 
         im = context.space_data.image
-        radpath = bpy.path.abspath("%s/"%(sc.procedural_compute.rad.caseDir))
+        radpath = bpy.path.abspath("%s/"%(sc.RAD.caseDir))
         filepath = bpy.path.abspath(im.filepath)
         (fpath, fname) = os.path.split(filepath)
 
@@ -88,7 +88,7 @@ Using default value of 20. Results will not be accurate.')
 
         # Create the threshold image
         cmd = "pcomb -o %s | pcompos -t %f - 0 0 | pfilt -e %u -1 > %s"\
-                %(filepath, (p.limit/p.mult), sc.procedural_compute.rad.falsecolor.exposure, outpath)
+                %(filepath, (p.limit/p.mult), sc.RAD.falsecolor.exposure, outpath)
         waitOUTPUT(cmd, cwd=fpath)
 
         # Load the new image into the image editor
@@ -100,11 +100,11 @@ Using default value of 20. Results will not be accurate.')
 
     def falsecolor(self, context):
         sc = context.scene
-        p = sc.procedural_compute.rad.falsecolor
+        p = sc.RAD.falsecolor
 
         # Get the image filename and path
         im = context.space_data.image
-        radpath = bpy.path.abspath("%s/"%(sc.procedural_compute.rad.caseDir))
+        radpath = bpy.path.abspath("%s/"%(sc.RAD.caseDir))
         filepath = bpy.path.abspath(im.filepath)
         (fpath, fname) = os.path.split(filepath)
 
@@ -226,7 +226,7 @@ Using default value of 20. Results will not be accurate.')
 
     def load(self, context):
         sc = context.scene
-        p = sc.procedural_compute.rad.falsecolor
+        p = sc.RAD.falsecolor
 
         im = context.space_data.image
         filepath = bpy.path.abspath(im.filepath)

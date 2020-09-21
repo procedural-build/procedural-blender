@@ -24,7 +24,7 @@ class ExportBase():
 
     def getFilename(self,s):
         sc = bpy.context.scene
-        return bpy.path.abspath("%s/%s"%(sc.procedural_compute.rad.caseDir, s))
+        return bpy.path.abspath("%s/%s"%(sc.RAD.caseDir, s))
 
     def createDir(self,dirpath):
         if not os.path.exists(dirpath):
@@ -53,46 +53,55 @@ class ExportBase():
         f.close()
         return
 
-    def faceToTriangles(self,face):
-        triangles = []
-        if (len(face) == 4): #quad
-            triangles.append( [ face[0], face[1], face[2] ] )
-            triangles.append( [ face[2], face[3], face[0] ] )
-        else:
-            triangles.append(face)
-        return triangles
+    def faceToTriangles(self, face):
+        """ Converts the given face to two triangles or leaves as-is
+        if already triangulated.
+        """
+        if len(face) == 3:
+            return [face]
+        # If this is a 4-sided face
+        if not len(face) == 4:
+            raise Exception("Length of vertices describing face should be either 4 or 3")
+        return [
+            [face[0], face[1], face[2]],
+            [face[2], face[3], face[0]]
+        ]
 
-    def faceValues(self,face, mesh):
-        fv = []
-        for i in range(len(face.vertices)):
-            verti = face.vertices_raw[i]
-            fv.append(mesh.vertices[verti].co)
-        return fv
+    def triString(self, tri, matname, obj_name, index):
+        text = "\n%s polygon %s_face-%d\n"%(matname, obj_name, index)
+        text += "0\n0\n%i\n" %(len(tri)*3)
+        for v in tri:
+            text += "    %f  %f  %f\n"%(v[0], v[1], v[2])
+        return text
 
     def writeTriangles(self, obj, matname):
-        if obj.type == 'MESH':
-            if len(obj.data.polygons) == 0:
-                return ''
-            # Get mesh in global coordinates
-            me = obj.to_mesh(bpy.context.scene, False, "PREVIEW")
-            me.transform(obj.matrix_world)
+        if not obj.type == 'MESH':
+            return ""
 
-            poly_text = ''
-            index = 0
-            for face in me.tessfaces:
-                globalNorm = face.normal
-                fv = self.faceValues(face, me)
-                tris = self.faceToTriangles(fv)
-                
-                # Write faces to text
-                for t in tris:
-                    poly_text += "\n%s polygon %s_face-%d\n"%(matname, obj.name, index)
-                    poly_text += "0\n0\n%i\n" %(len(t)*3)
-                    for v in t:
-                        poly_text += "    %f  %f  %f\n"%(v[0], v[1], v[2])
-                    index += 1
-            return poly_text
-        return ''
+        if len(obj.data.polygons) == 0:
+            return ''
+
+        # Get mesh in global coordinates
+        try:
+            me = obj.to_mesh()
+        except RuntimeError:
+            return ""
+
+        me.transform(obj.matrix_world)
+        vertices = me.vertices
+
+        poly_text = ''
+        index = 0
+        me.calc_loop_triangles()
+        for face in me.loop_triangles:
+            face_vertex_coords = [vertices[index].co.copy() for index in face.vertices]
+            tris = self.faceToTriangles(face_vertex_coords)
+
+            # Write faces to text
+            for tri in tris:
+                poly_text += self.triString(tri, matname, obj.name, index)
+                index += 1
+        return poly_text
 
     def exportObject(self, obj, matname="ods_default_material"):
         # Get text to write for triangulated face of each object
@@ -131,7 +140,7 @@ class ExportBase():
 
     def createViewFile(self, c, viewname):
         sc = bpy.context.scene
-        
+
         v = c.location.copy()
         v[0]=0.0;v[1]=0.0;v[2]=-1.0
         vd = c.matrix_world.to_3x3() * v
@@ -162,7 +171,7 @@ class ExportBase():
                 vh = vv*imgW/imgH
         text += "-vv %.3f -vh %.3f" %(vv, vh)
         text = "rvu " + vtype + " " + text
-        
+
         filename = self.getFilename("views/%s.vf"%viewname)
         self.createFile(filename, text)
         return viewname, "views/%s.vf"%viewname
@@ -182,14 +191,13 @@ class ExportBase():
         self.materialsList = []
         self.references = []
         self.views = []
-        for obj in bpy.context.selected_objects:
+        for obj in bpy.context.visible_objects:
             if len(obj.material_slots) > 0:
                 matname = obj.material_slots[0].name
                 material = bpy.data.materials[matname]
-                if skipNone and material.procedural_compute.rad.type == "None":
+                if skipNone and material.RAD.type == "None":
                     continue
             expdef = 'export%s'%(obj.type.lower())
             if hasattr(self, expdef):
                 getattr(self, expdef)(obj)
         return None
-

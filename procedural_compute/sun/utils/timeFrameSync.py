@@ -11,8 +11,8 @@ import bpy
 
 def frameToTime(frame):
     sc = bpy.context.scene
-    solarDT = sc.procedural_compute.sun.solarDT
-    
+    solarDT = sc.ODS_SUN.solarDT
+
     # Get the hour and minute from the current frame and timestep size
     hour = int(frame/solarDT)
     minute = (frame - (solarDT*hour))*int(60/solarDT)
@@ -21,7 +21,7 @@ def frameToTime(frame):
 
 def timeToFrame(hour, minute):
     sc = bpy.context.scene
-    solarDT = sc.procedural_compute.sun.solarDT
+    solarDT = sc.ODS_SUN.solarDT
 
     # Loop minutes around (in case specified minutes are greater than 60 or less than 0)
     if minute >= 60:
@@ -38,12 +38,12 @@ def timeToFrame(hour, minute):
         minute = (int(minute/int(60/solarDT)))*int(60/solarDT)
 
     # Sync hour/minute with current frame
-    frame_current = (hour * solarDT) + int(minute / int(60/solarDT)) 
+    frame_current = (hour * solarDT) + int(minute / int(60/solarDT))
 
     return frame_current
 
 def getTimeStamp():
     sc = bpy.context.scene
     (hour, minute) = frameToTime(sc.frame_current)
-    timestamp = "%02d%02d_%02d%02d"%(sc.procedural_compute.sun.month, sc.procedural_compute.sun.day, hour, minute)
+    timestamp = "%02d%02d_%02d%02d"%(sc.ODS_SUN.month, sc.ODS_SUN.day, hour, minute)
     return timestamp
