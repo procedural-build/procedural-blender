@@ -72,7 +72,7 @@ class GenericViewSet():
             raw = raw
         )
 
-    def delete(self, object_id, data, query_params=None):
+    def delete(self, object_id, query_params=None):
         return USER[0].request(
             'DELETE',
             self.object_path(object_id),

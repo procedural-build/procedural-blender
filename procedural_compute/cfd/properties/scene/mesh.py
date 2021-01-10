@@ -24,8 +24,8 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
     # Castellated Mesh parameters
     blockMeshSize: bpy.props.FloatProperty(name="BlockMeshSize", step=1, precision=2, default=1.0, description="Approx. BlockMesh Cell Size")
     defaultLevel: bpy.props.IntProperty(name="defaultLevel", min=0, description="Default Surface Mesh Level")
-    maxLocalCells: bpy.props.IntProperty(name="maxLocalCells", default=4000000, description="Maximum Cells on a Single Processor")
-    maxGlobalCells: bpy.props.IntProperty(name="maxGlobalCells", default=4000000, description="Maximum Total Number of Cells")
+    maxLocalCells: bpy.props.IntProperty(name="maxLocalCells", default=16000000, description="Maximum Cells on a Single Processor")
+    maxGlobalCells: bpy.props.IntProperty(name="maxGlobalCells", default=16000000, description="Maximum Total Number of Cells")
     minRefinementCells: bpy.props.IntProperty(name="minRefinementCells", default=10, description="Minimum number of cells for subdivision")
     nCellsBetweenLevels: bpy.props.IntProperty(name="nCellsBetweenLevels", default=2, description="Cells between levels")
     resolveFeatureAngle: bpy.props.FloatProperty(name="resolveFeatureAngle", description="Angle to resolve features", step=1, precision=1, default=0.52, subtype="ANGLE")
@@ -68,15 +68,41 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
         col.prop(self, "blockMeshSize")
         col = split.column()
         col.operator("scene.cfdoperators", text="snapBB").command = "snapCFDBoundingBox"
-        #col = split.column()
-        #col.prop(self, "defaultLevel")
 
+        # Castellated mesh settings
+        box_layout = layout.box()
+        box_layout.row().prop(self, "castellated")
+        if self.castellated:
+            row = box_layout.row()
+            row.prop(self, "maxLocalCells")
+            row.prop(self, "maxGlobalCells")
+
+            row = box_layout.row()
+            row.prop(self, "nCellsBetweenLevels")
+            row.prop(self, "minRefinementCells")
+
+        # Castellated mesh settings
+        box_layout = layout.box()
+        box_layout.row().prop(self, "snap")
+        if self.snap:
+            box_layout.row().prop(self, "tolerance")
+
+        # Castellated mesh settings
+        box_layout = layout.box()
+        box_layout.row().prop(self, "addLayers")
+
+        # Operators
         layout.row().operator("scene.compute_cfdoperators", text="Upload Geometry").command = "upload_geometry"
         layout.row().operator("scene.compute_cfdoperators", text="Write Mesh Files").command = "write_mesh_files"
         layout.row().operator("scene.compute_cfdoperators", text="Write Solver Files").command = "write_solver_files"
 
-        row = layout.row()
-        row.operator("scene.compute_cfdoperators", text="Run Mesh Pipeline").command = "run_mesh_pipeline"
+        layout.row().operator("scene.compute_cfdoperators", text="Run Mesh Pipeline").command = "run_mesh_pipeline"
+
+        box_layout = layout.box()
+        box_layout.row().label(text="Clean/delete methods (use with caution):")
+        box_layout.row().operator("scene.compute_cfdoperators", text="Clean Processor Dirs").command = "clean_processor_dirs"
+        box_layout.row().operator("scene.compute_cfdoperators", text="Clean Mesh Files").command = "clean_mesh_files"
+
 
         '''
         if self.basic:
@@ -243,8 +269,18 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
         # Overrides
         keep_point = self.get_unique_object('cfdMeshKeepPoint')
         overrides_dict = {
+            'castellatedMesh': self.castellated,
+            'snap': self.snap,
+            'addLayers': self.addLayers,
             'castellatedMeshControls': {
-                'locationInMesh': [co for co in keep_point.location]
+                'locationInMesh': [co for co in keep_point.location],
+                'maxLocalCells': self.maxLocalCells,
+                'maxGlobalCells': self.maxGlobalCells,
+                'minRefinementCells': self.minRefinementCells,
+                'nCellsBetweenLevels': self.nCellsBetweenLevels
+            },
+            'snapControls': {
+                'tolerance': self.tolerance
             }
         }
 

@@ -66,8 +66,8 @@ class User():
         expiry = datetime.utcfromtimestamp(exp_timestamp)
         return (expiry - now).total_seconds()
 
-    def headers(self, extra_headers=None):
-        header = self.content_header
+    def headers(self, extra_headers={}):
+        header = self.content_header.copy()
         if self.token:
             header.update({'Authorization': 'JWT %s'%(self.token)})
         if extra_headers:
@@ -131,7 +131,7 @@ class User():
         # Should not get here
         return decoded_response
 
-    def request(self, method, url, data=None, query_params=None, extra_headers=None, raw=False):
+    def request(self, method, url, data=None, query_params=None, extra_headers={}, raw=False):
         # Check if the access token needs refreshing unless we are calling an auth-jwt endpoint
         if not url.startswith('/auth-jwt/'):
             self.refresh_token()
@@ -144,14 +144,22 @@ class User():
             # Send POST requst with JSON encoded data
             data = json.dumps(data).encode('utf8')
 
+        _extra_headers = extra_headers.copy()
+        if raw and (not "content-type" in extra_headers):
+            print("Setting raw body content-type to application/octet-stream")
+            _extra_headers.update({"content-type": "application/octet-stream"})
+
         # Remove data from GET requests (otherwise urllib will conver this to a POST automatically)
         if method == "GET":
             data = None
 
+        # Get the headers to use
+        headers = self.headers(_extra_headers)
+
         # Get the actual request object
-        print(f"Sending Request: [{method}] {url}: {data}")
-        #print(f"Sending data: {data}")
-        request = Req.Request(url, method=method, data=data, headers=self.headers(extra_headers))
+        print(f"Sending Request: [{method}] {url}: {headers}")  # : {data}
+        request = Req.Request(url, method=method, data=data, headers=headers)
+
         try:
             self.last_response = Req.urlopen(request, context=ssl_context)
         except HTTPError as err:

@@ -13,6 +13,8 @@ import shutil
 import glob
 import json
 import io
+import re
+import time
 
 from procedural_compute.cfd.utils import foamCaseFiles, asciiSTLExport, mesh, foamUtils
 from procedural_compute.core.utils import subprocesses, fileUtils, threads
@@ -23,6 +25,15 @@ from procedural_compute.core.utils.compute.auth import USER, User
 from procedural_compute.core.utils.compute.view import GenericViewSet
 
 from .utils import get_sets_from_selected, color_object
+
+
+def get_system_properties():
+    system_settings = bpy.context.scene.ODS_CFD.system
+    solver_properties = bpy.context.scene.ODS_CFD.solver
+    control_properties = bpy.context.scene.ODS_CFD.control
+    project_id = system_settings.project_id
+    task_id = system_settings.task_id
+    return (project_id, task_id, control_properties, solver_properties, system_settings)
 
 
 class SCENE_OT_cfdOperators(bpy.types.Operator):
@@ -340,7 +351,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
                         "reconstructPar -noZero"
                     ],
                     'cpus': [i for i in system_settings.decompN],
-                    'iterations': control_properties.endTime
+                    'iterations': {
+                        'init': control_properties.endTime
+                    }
                 }
             }
         )
@@ -419,6 +432,69 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         )
 
         return solver_task
+
+    def clean_processor_dirs(self, path_prefix="foam"):
+        system_settings = bpy.context.scene.ODS_CFD.system
+        solver_properties = bpy.context.scene.ODS_CFD.solver
+        control_properties = bpy.context.scene.ODS_CFD.control
+        project_id = system_settings.project_id
+        task_id = system_settings.task_id
+
+        # Get the file list
+        files = GenericViewSet(
+            f'/api/task/{task_id}/file/'
+        ).list()
+
+        # Get the processor folder paths using regex
+        processor_paths = set()
+        for _file in files:
+            processors = re.findall(f'{path_prefix}/processor[0-9]*/', _file.get("file"))
+            processor_paths = processor_paths.union(set(processors))
+        print(f"Got processor folder paths: {processor_paths}")
+
+        # Delete each of the paths
+        for path in processor_paths:
+            response = GenericViewSet(
+                f'/api/task/{task_id}/file/'
+            ).delete(path)
+            print(f"Deleted processor path: {path}")
+            time.sleep(0.1)     # Sleep for a bit to avoid throttling
+
+    def clean_mesh_files(self, path_prefix="foam/constant"):
+        system_settings = bpy.context.scene.ODS_CFD.system
+        solver_properties = bpy.context.scene.ODS_CFD.solver
+        control_properties = bpy.context.scene.ODS_CFD.control
+        project_id = system_settings.project_id
+        task_id = system_settings.task_id
+
+        # Get the file list
+        files = GenericViewSet(
+            f'/api/task/{task_id}/file/'
+        ).list()
+
+        # Get the processor folder paths using regex
+        mesh_files = set()
+        for _file in files:
+            paths = re.findall(f'{path_prefix}/polyMesh/.*', _file.get("file"))
+            paths = [i for i in paths if not i.endswith('blockMeshDict')]
+            mesh_files = mesh_files.union(set(paths))
+
+        # Get the first level files and folders
+        for _path in mesh_files:
+            folder_path = re.findall(".*/polyMesh/.*/", _path)
+            if folder_path:
+                mesh_files.remove(_file)
+                mesh_files = mesh_files.union(set(folder_path))
+
+        print(f"Got mesh file and folder paths: {mesh_files}")
+
+        # Delete each of the paths
+        for path in mesh_files:
+            response = GenericViewSet(
+                f'/api/task/{task_id}/file/'
+            ).delete(path)
+            print(f"Deleted mesh file path: {path}")
+            time.sleep(0.1)     # Sleep for a bit to avoid throttling
 
     def probe_selected(self):
         system_settings = bpy.context.scene.ODS_CFD.system
