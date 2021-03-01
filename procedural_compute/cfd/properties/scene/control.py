@@ -47,15 +47,23 @@ class BM_SCENE_CFDControl(bpy.types.PropertyGroup):
 
     writePrecision: bpy.props.IntProperty(name="writePrecision", default=6, description="writePrecision")
 
+    n_angles: bpy.props.IntProperty(name="nAngles", default=16, description="Number of Angles for VWT")
+    iters_n: bpy.props.IntProperty(name="itersN", default=0, description="Number of iterations for follow-on (series) simulations.  Set to zero to equal endTime")
+
     def drawMenu(self, layout):
         sc = bpy.context.scene
         split = layout.split()
 
+        layout.row().prop(self, "endTime")
         layout.row().operator("scene.compute_cfdoperators", text="Run Solver").command = "run_solver"
 
-        layout.row().operator("scene.compute_cfdoperators", text="Run Wind Tunnel").command = "run_wind_tunnel"
+        box = layout.box()
+        box.row().label(text="Virtual Wind Tunnel")
+        split = box.split()
+        split.column().prop(self, "n_angles")
+        split.column().prop(self, "iters_n")
+        box.row().operator("scene.compute_cfdoperators", text="Run Wind Tunnel").command = "run_wind_tunnel"
 
-        layout.row().prop(self, "endTime")
         #layout.row().prop(self, "stopAt", expand=False)
         #row = layout.row()
         #row.operator("scene.cfdoperators", text="Write controlDict").command = "write_control_dict"

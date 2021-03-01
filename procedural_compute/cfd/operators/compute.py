@@ -374,7 +374,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         )
 
         # Angles and increments
-        n_angles = 16
+        n_angles = control_properties.n_angles
         incr = 360 / n_angles
 
         # Get the details of the domain
@@ -398,7 +398,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
                 'bounding_box': {"x": bounding_box[0], "y": bounding_box[1], "z": bounding_box[2]},
                 'iterations': {
                     'init': control_properties.endTime,
-                    'run': control_properties.endTime
+                    'run': control_properties.iters_n or control_properties.endTime
                 }
             }
         )
