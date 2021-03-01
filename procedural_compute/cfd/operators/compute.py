@@ -458,7 +458,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
                 f'/api/task/{task_id}/file/'
             ).delete(path)
             print(f"Deleted processor path: {path}")
-            time.sleep(0.1)     # Sleep for a bit to avoid throttling
+            time.sleep(0.05)     # Sleep for a bit to avoid throttling
 
     def clean_mesh_files(self, path_prefix="foam/constant"):
         system_settings = bpy.context.scene.ODS_CFD.system
@@ -480,10 +480,10 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             mesh_files = mesh_files.union(set(paths))
 
         # Get the first level files and folders
-        for _path in mesh_files:
+        for _path in list(mesh_files):
             folder_path = re.findall(".*/polyMesh/.*/", _path)
             if folder_path:
-                mesh_files.remove(_file)
+                mesh_files.remove(_path)
                 mesh_files = mesh_files.union(set(folder_path))
 
         print(f"Got mesh file and folder paths: {mesh_files}")
@@ -494,7 +494,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
                 f'/api/task/{task_id}/file/'
             ).delete(path)
             print(f"Deleted mesh file path: {path}")
-            time.sleep(0.1)     # Sleep for a bit to avoid throttling
+            time.sleep(0.05)     # Sleep for a bit to avoid throttling
 
     def probe_selected(self):
         system_settings = bpy.context.scene.ODS_CFD.system
