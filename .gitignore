@@ -1,3 +1,5 @@
 **/__pycache__/*
 *.zip
 !releases/**/*.zip
+.idea
+.vs
