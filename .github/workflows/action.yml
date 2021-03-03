@@ -21,8 +21,8 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ env.GITHUB_RUN_ID }}
-          release_name: Release ${{ env.GITHUB_RUN_ID }}
+          tag_name: ${{ GITHUB_RUN_ID }}
+          release_name: Release ${{ GITHUB_RUN_ID }}
           body_path: .github/releases/release.md
           draft: false
           prerelease: false
