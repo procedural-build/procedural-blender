@@ -8,7 +8,7 @@
 
 
 import bpy
-from procedural_compute.core.properties import BM_SCENE_ODS
+from procedural_compute.core.utils.mainmenu import mainmenu_loaded
 
 ###################
 # MATERIALS MENU
@@ -25,7 +25,7 @@ class MATERIAL_PT_bm(bpy.types.Panel):
         layout = self.layout
         sc = context.scene
         # Main Menu Headings
-        if len(BM_SCENE_ODS.__annotations__['mainMenu'][1]['items']) > 0:
+        if mainmenu_loaded():
             layout.row().prop(sc.ODS, "mainMenu", expand=True)
 
         return

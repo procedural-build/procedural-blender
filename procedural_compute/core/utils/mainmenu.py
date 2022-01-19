@@ -33,6 +33,9 @@ def remove(module):
     items_list.remove(makeTuple(menuList[m]))
     update_mainmenu(items_list)
 
+def mainmenu_loaded():
+    from procedural_compute.core.properties import BM_SCENE_ODS
+    return len(BM_SCENE_ODS.__annotations__['mainMenu'].keywords['items']) > 0
 
 def update_mainmenu(items_list):
     if len(items_list) == 0:

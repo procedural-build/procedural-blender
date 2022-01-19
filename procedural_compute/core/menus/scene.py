@@ -9,7 +9,7 @@
 
 import bpy
 
-from procedural_compute.core.properties import BM_SCENE_ODS
+from procedural_compute.core.utils.mainmenu import mainmenu_loaded
 
 
 ###################
@@ -46,7 +46,7 @@ class SCENE_PT_bm(bpy.types.Panel):
         # Draw the header
         self.drawHeader(context)
         # Main Menu Headings
-        if len(BM_SCENE_ODS.__annotations__['mainMenu'][1]['items']) > 0:
+        if mainmenu_loaded():
             layout.row().prop(sc.ODS, "mainMenu", expand=True)
 
         return
