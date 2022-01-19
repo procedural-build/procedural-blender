@@ -8,7 +8,7 @@
 
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 from procedural_compute.core.utils.compute.auth import USER
 
 

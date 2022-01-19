@@ -9,7 +9,7 @@
 import bpy
 
 from procedural_compute.core.utils.blendmeUtils import drawCollectionTemplateList
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 
 
 class iesLight(bpy.types.PropertyGroup):

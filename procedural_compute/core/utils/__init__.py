@@ -10,3 +10,5 @@
 Common utility functions used within ODS and its associated sub-modules
 """
 
+def make_tuples(items: list):
+    return [(x, x, x) for x in items]

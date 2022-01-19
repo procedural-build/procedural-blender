@@ -8,27 +8,27 @@
 
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 
 
 class BM_SCENE_CFDControl(bpy.types.PropertyGroup):
 
-    items_list = makeTuples(["firstTime", "latestTime", "startTime"])
+    items_list = make_tuples(["firstTime", "latestTime", "startTime"])
     startFrom: bpy.props.EnumProperty(name="startFrom", items=items_list, description="startFrom", default="latestTime")
 
-    items_list = makeTuples(["endTime", "nextWrite", "writeNow", "noWriteNow"])
+    items_list = make_tuples(["endTime", "nextWrite", "writeNow", "noWriteNow"])
     stopAt: bpy.props.EnumProperty(name="stopAt", items=items_list, description="stopAt", default="endTime")
 
-    items_list = makeTuples(["timeStep", "runTime", "adjustableRunTime", "cpuTime", "clockTime"])
+    items_list = make_tuples(["timeStep", "runTime", "adjustableRunTime", "cpuTime", "clockTime"])
     writeControl: bpy.props.EnumProperty(name="writeControl", items=items_list, description="writeControl", default="timeStep")
 
-    items_list = makeTuples(["ascii", "binary"])
+    items_list = make_tuples(["ascii", "binary"])
     writeFormat: bpy.props.EnumProperty(name="writeFormat", items=items_list, description="writeFormat", default="ascii")
 
-    items_list = makeTuples(["compressed", "uncompressed"])
+    items_list = make_tuples(["compressed", "uncompressed"])
     writeCompression: bpy.props.EnumProperty(name="writeCompression", items=items_list, description="writeCompression", default="uncompressed")
 
-    items_list = makeTuples(["general", "scientific", "fixed"])
+    items_list = make_tuples(["general", "scientific", "fixed"])
     timeFormat: bpy.props.EnumProperty(name="timeFormat", items=items_list, description="timeFormat", default="general")
 
     adjustTimeStep: bpy.props.BoolProperty(name="adjustTimeStep", description="Variable Time Step", default=False)

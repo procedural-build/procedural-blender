@@ -19,7 +19,7 @@ def drawBasic(self, context):
     mat = context.material
 
     # Skip this menu if the mainMenu is not pointing to CFD
-    if sc.ODS.mainMenu != "Radiance":
+    if sc.Compute.mainMenu != "Radiance":
         return
 
     if mat == None:

@@ -7,21 +7,21 @@
 ###########################################################
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 
 
 class BM_SCENE_RAD_FRAME(bpy.types.PropertyGroup):
 
-    items_list = makeTuples(["low","medium","high"])
+    items_list = make_tuples(["low","medium","high"])
     quality: bpy.props.EnumProperty(name="quality", items=items_list, description="Radiance Output Quality", default="medium")
 
-    items_list = makeTuples(["low","medium","high"])
+    items_list = make_tuples(["low","medium","high"])
     detail: bpy.props.EnumProperty(name="detail", items=items_list, description="Radiance Output Detail", default="medium")
 
-    items_list = makeTuples(["low","medium","high"])
+    items_list = make_tuples(["low","medium","high"])
     variability: bpy.props.EnumProperty(name="variability", items=items_list, description="Radiance Output Variability", default="medium")
 
-    items_list = makeTuples(["Interior","Exterior"])
+    items_list = make_tuples(["Interior","Exterior"])
     zoneType: bpy.props.EnumProperty(name="zoneType", items=items_list, description="Radiance zoneType", default="Interior")
 
     penumbras: bpy.props.BoolProperty(name="penumbras", description="Radiance Output Penumbras", default=True)

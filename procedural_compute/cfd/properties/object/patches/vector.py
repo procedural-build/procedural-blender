@@ -7,7 +7,7 @@
 ###########################################################
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 
 
 class defaultPatch():
@@ -110,7 +110,7 @@ class ODS_CFD_PATCH_VECTOR(bpy.types.PropertyGroup):
     inletOutlet: bpy.props.PointerProperty(type=ODS_CFD_PATCH_VECTOR_inletOutlet)
     other: bpy.props.PointerProperty(type=ODS_CFD_PATCH_VECTOR_other)
 
-    items_list = makeTuples([
+    items_list = make_tuples([
         "fixedValue",
         "zeroGradient",
         "inletOutlet",

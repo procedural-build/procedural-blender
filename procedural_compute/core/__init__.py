@@ -29,16 +29,16 @@ def menu_add_north(self, context):
 def register():
     bpy.types.VIEW3D_MT_mesh_add.append(menu_add_north)
     #------------------
-    bpy.utils.register_class(menus.scene.SCENE_PT_bm)
-    bpy.utils.register_class(menus.object.OBJECT_PT_bm)
-    bpy.utils.register_class(menus.material.MATERIAL_PT_bm)
+    bpy.utils.register_class(menus.scene.SCENE_PT_COMPUTE)
+    bpy.utils.register_class(menus.object.OBJECT_PT_COMPUTE)
+    bpy.utils.register_class(menus.material.MATERIAL_PT_COMPUTE)
     return
 
 
 def unregister():
     bpy.types.VIEW3D_MT_mesh_add.remove(menu_add_north)
     #------------------
-    bpy.utils.unregister_class(menus.scene.SCENE_PT_bm)
-    bpy.utils.unregister_class(menus.object.OBJECT_PT_bm)
-    bpy.utils.unregister_class(menus.material.MATERIAL_PT_bm)
+    bpy.utils.unregister_class(menus.scene.SCENE_PT_COMPUTE)
+    bpy.utils.unregister_class(menus.object.OBJECT_PT_COMPUTE)
+    bpy.utils.unregister_class(menus.material.MATERIAL_PT_COMPUTE)
     return

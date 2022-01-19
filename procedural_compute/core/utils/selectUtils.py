@@ -23,13 +23,6 @@ import bpy
 import math
 
 
-def makeTuples(l):
-    ltuples = []
-    for x in l:
-        ltuples.append((x, x, x))
-    return ltuples
-
-
 def matString(o):
     # String together all the names of the materials
     constName = ''

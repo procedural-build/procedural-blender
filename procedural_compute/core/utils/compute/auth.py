@@ -20,7 +20,9 @@ ssl_context = ssl._create_unverified_context()
 
 # Common function for pretty-print JSON data
 def printJSON(pyObj):
-    print(json.dumps(pyObj, indent=4))
+    json_str = json.dumps(pyObj, indent=4)
+    logger.info(json_str)
+    return json_str
 
 # Store each user in a class with their access token and a method
 # "request" to GET, POST, PUT, DELETE to the API urls
@@ -86,7 +88,7 @@ class User():
         for token_type in ['access', 'refresh']:
             if response_dict.get(token_type, None) is None:
                 raise Exception("Error getting token: %s", self.printJSON(response_dict))
-        print("Got new token. Will expire in", self.token_exp_time)
+        logger.info(f"Got new token. Will expire in: {self.token_exp_time}")
         return self.token
 
     def refresh_token(self, time_remaining = 20):
@@ -96,12 +98,12 @@ class User():
         # Check if the current access token is valid
         exp_time = self.token_exp_time
         if exp_time and exp_time > time_remaining:
-            print("No refresh required. Token will expire in", exp_time)
+            logger.info("No refresh required. Token will expire in", exp_time)
             return self.token
         # Do the refresh
         response_dict = self.request('POST', '/auth-jwt/refresh/', {'refresh': self._refresh_token})
         self._access_token = response_dict['access']
-        print("Refreshed token. Will expire in", self.token_exp_time)
+        logger.info("Refreshed token. Will expire in", self.token_exp_time)
         return self.token
 
     def verify_token(self):
@@ -146,7 +148,7 @@ class User():
 
         _extra_headers = extra_headers.copy()
         if raw and (not "content-type" in extra_headers):
-            print("Setting raw body content-type to application/octet-stream")
+            logger.info("Setting raw body content-type to application/octet-stream")
             _extra_headers.update({"content-type": "application/octet-stream"})
 
         # Remove data from GET requests (otherwise urllib will conver this to a POST automatically)
@@ -157,14 +159,14 @@ class User():
         headers = self.headers(_extra_headers)
 
         # Get the actual request object
-        print(f"Sending Request: [{method}] {url}: {headers}")  # : {data}
+        logger.info(f"Sending Request: [{method}] {url}: {headers}")  # : {data}
         request = Req.Request(url, method=method, data=data, headers=headers)
 
         try:
             self.last_response = Req.urlopen(request, context=ssl_context)
         except HTTPError as err:
             msg = err.read().decode('utf8')
-            print(msg)
+            logger.info(msg)
             self.last_response = None
             raise Exception("Request failed due to: %s"%(msg))
 
@@ -175,4 +177,11 @@ USER = [User('', '')]
 
 
 def get_current_user():
+    return USER[0]
+
+
+def login_user(username, password, host):
+    USER[0] = User(username, password, host = host)
+    logger.info(f"Getting token for user {username} from {host}")
+    USER[0].get_token()
     return USER[0]

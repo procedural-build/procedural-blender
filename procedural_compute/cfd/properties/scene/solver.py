@@ -7,7 +7,7 @@
 ###########################################################
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 from procedural_compute.cfd.utils.foamUtils import formatObjectName
 from procedural_compute.cfd.properties.scene.turbulence import BM_SCENE_CFDSolver_RAS
 from procedural_compute.cfd.properties.scene.turbulence import BM_SCENE_CFDSolver_LES
@@ -44,7 +44,7 @@ bpy.utils.register_class(ODS_CFD_FIELD_SCALAR)
 class ODS_CFD_FIELDS(bpy.types.PropertyGroup):
     volScalarField: bpy.props.PointerProperty(type=ODS_CFD_FIELD_SCALAR)
     volVectorField: bpy.props.PointerProperty(type=ODS_CFD_FIELD_VECTOR)
-    items_list = makeTuples(["volVectorField", "volScalarField"])
+    items_list = make_tuples(["volVectorField", "volScalarField"])
     classType: bpy.props.EnumProperty(name="classType", items=items_list, description="classType", default="volScalarField")
     dim: bpy.props.StringProperty(name="dim", default="[0,1,-1,0,0,0,0]")
 
@@ -69,7 +69,7 @@ class BM_SCENE_CFDSolver(bpy.types.PropertyGroup):
     RAS: bpy.props.PointerProperty(type=BM_SCENE_CFDSolver_RAS)
     LES: bpy.props.PointerProperty(type=BM_SCENE_CFDSolver_LES)
 
-    items_list = makeTuples([
+    items_list = make_tuples([
         "potentialFoam",
         "simpleFoam",
         "pisoFoam",
@@ -80,7 +80,7 @@ class BM_SCENE_CFDSolver(bpy.types.PropertyGroup):
     ])
     name: bpy.props.EnumProperty(name="solver", items=items_list, description="Solver Name", default="simpleFoam")
 
-    items_list = makeTuples(["Laminar", "RAS"])
+    items_list = make_tuples(["Laminar", "RAS"])
     turbModel: bpy.props.EnumProperty(name="turbModel", items=items_list, description="Turbulence Model", default="RAS")
 
     nu: bpy.props.FloatProperty(name="nu", step=1, precision=5, description="Kinematic Viscosity (nu)", default=1.5e-5)

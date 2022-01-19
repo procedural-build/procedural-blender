@@ -8,6 +8,7 @@
 
 import bpy
 import procedural_compute.rad.properties.object
+from procedural_compute.utils.mainmenu import mainmenu_loaded
 
 
 class DATA_PT_camera_bm(bpy.types.Panel):
@@ -26,10 +27,10 @@ class DATA_PT_camera_bm(bpy.types.Panel):
         layout = self.layout
         sc = context.scene
         # Main Menu Headings
-        if len(bpy.types.BM_SCENE_ODS.mainMenu[1]['items']) > 0:
-            layout.row().prop(sc.ODS, "mainMenu", expand=True)
+        if mainmenu_loaded():
+            layout.row().prop(sc.Compute, "mainMenu", expand=True)
             
-        if sc.ODS.mainMenu != "Radiance":
+        if sc.Compute.mainMenu != "Radiance":
             return
 
         # Draw the object property menu

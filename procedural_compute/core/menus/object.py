@@ -15,7 +15,7 @@ from procedural_compute.core.utils.mainmenu import mainmenu_loaded
 ###################
 
 
-class OBJECT_PT_bm(bpy.types.Panel):
+class OBJECT_PT_COMPUTE(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "object"
@@ -26,6 +26,6 @@ class OBJECT_PT_bm(bpy.types.Panel):
         sc = context.scene
         # Main Menu Headings
         if mainmenu_loaded():
-            layout.row().prop(sc.ODS, "mainMenu", expand=True)
+            layout.row().prop(sc.Compute, "mainMenu", expand=True)
 
         return

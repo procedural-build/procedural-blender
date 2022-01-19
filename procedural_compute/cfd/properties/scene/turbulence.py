@@ -7,12 +7,12 @@
 ###########################################################
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 
 
 class BM_SCENE_CFDSolver_LES(bpy.types.PropertyGroup):
 
-    items_list = makeTuples(["Smagorinsky", "oneEqEddy", "SpalartAllmaras"])
+    items_list = make_tuples(["Smagorinsky", "oneEqEddy", "SpalartAllmaras"])
     model: bpy.props.EnumProperty(name="lesModel", items=items_list, description="LES Turbulence Model", default="oneEqEddy")
 
     def drawMenu(self, layout):
@@ -26,7 +26,7 @@ bpy.utils.register_class(BM_SCENE_CFDSolver_LES)
 
 class BM_SCENE_CFDSolver_RAS(bpy.types.PropertyGroup):
 
-    items_list = makeTuples(["kEpsilon", "kOmega", "kOmegaSST"])
+    items_list = make_tuples(["kEpsilon", "kOmega", "kOmegaSST"])
     model: bpy.props.EnumProperty(name="rasModel", items=items_list, description="RAS Turbulence Model", default="kEpsilon")
 
     def drawMenu(self, layout):

@@ -8,7 +8,7 @@
 
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 
 
 class BM_OBJ_RAD(bpy.types.PropertyGroup):

@@ -8,7 +8,7 @@
 
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 
 
 class imageprops(bpy.types.PropertyGroup):
@@ -22,7 +22,7 @@ class imageprops(bpy.types.PropertyGroup):
     exposure: bpy.props.IntProperty(name="exposure", default=-4, description="Output exposure")
     overlaypic: bpy.props.StringProperty(name="picture", description="Overlay Picture", maxlen=248, default="", subtype='FILE_PATH')
     output: bpy.props.StringProperty(name="output", description="Output", maxlen=248, default="out.hdr", subtype='FILE_PATH')
-    items_list = makeTuples(["None","Lines","Bands"])
+    items_list = make_tuples(["None","Lines","Bands"])
     contours: bpy.props.EnumProperty(name="contours", items=items_list, default="None")
     limit: bpy.props.FloatProperty(name="lim", description="Threshold limit value", default=500)
 

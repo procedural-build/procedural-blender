@@ -9,7 +9,7 @@
 
 import bpy
 
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 from procedural_compute.rad.utils.radUtils import formatName
 
 from .plastic import BM_MAT_RAD_PLASTIC
@@ -20,7 +20,7 @@ from .trans import BM_MAT_RAD_TRANS
 
 class BM_MAT_RAD(bpy.types.PropertyGroup):
 
-    items_list = makeTuples(["Plastic", "Glass", "Metal", "Mirror","Trans", "None"])
+    items_list = make_tuples(["Plastic", "Glass", "Metal", "Mirror","Trans", "None"])
     type: bpy.props.EnumProperty(name="Type", items=items_list, description="Material Type", default="Plastic")
 
     Plastic: bpy.props.PointerProperty(type=BM_MAT_RAD_PLASTIC)

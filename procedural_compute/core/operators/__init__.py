@@ -11,3 +11,4 @@ from .mesh import *
 from .object import *
 from .scene import *
 from .aiotasks import *
+from .compute import *

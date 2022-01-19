@@ -19,6 +19,7 @@ import time
 from procedural_compute.cfd.utils import foamCaseFiles, asciiSTLExport, mesh, foamUtils
 from procedural_compute.core.utils import subprocesses, fileUtils, threads
 from procedural_compute.core.utils.subprocesses import waitSTDOUT
+from procedural_compute.core.utils.secrets import secure_login
 import procedural_compute.cfd.solvers
 
 from procedural_compute.core.utils.compute.auth import USER, User
@@ -56,17 +57,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return{'FINISHED'}
 
     def login(self):
-        """ """
-        system_settings = bpy.context.scene.ODS_CFD.system
-        USER[0] = User(
-            system_settings.username,
-            system_settings.password,
-            host = system_settings.host
-        )
-        print("GETTING USER TOKEN")
-        USER[0].get_token()
-        system_settings.access_token = USER[0].token
-        system_settings.expire_time = "%.02f"%(USER[0].token_exp_time)
+        """ Login user with provided details OR credentials from environment variables 
+        """
+        secure_login()
 
     def refresh(self):
         """ """

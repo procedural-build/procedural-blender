@@ -9,13 +9,13 @@
 
 import bpy
 
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 from procedural_compute.rad.utils.radUtils import formatName
 
 
 class BM_MAT_RAD_METAL(bpy.types.PropertyGroup):
 
-    items_list = makeTuples(["VeryRough","Rough","MediumRough","MediumSmooth","Smooth","VerySmooth"])
+    items_list = make_tuples(["VeryRough","Rough","MediumRough","MediumSmooth","Smooth","VerySmooth"])
     roughness: bpy.props.EnumProperty(
         name="Roughness",items=items_list,
         description="Influences only External Convection Coefficients",

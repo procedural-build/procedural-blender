@@ -8,7 +8,7 @@
 
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 
 from procedural_compute.cfd.properties.scene.mesh import BM_SCENE_CFDMesh
 from procedural_compute.cfd.properties.scene.control import BM_SCENE_CFDControl
@@ -24,7 +24,7 @@ class BM_SCENE_CFD(bpy.types.PropertyGroup):
     system: bpy.props.PointerProperty(type=BM_SCENE_CFDSystem)
     postproc: bpy.props.PointerProperty(type=BM_SCENE_CFDPostProc)
 
-    items_list = makeTuples(["System", "Solver", "Mesh", "Control", "PostProc"])
+    items_list = make_tuples(["System", "Solver", "Mesh", "Control", "PostProc"])
     menu: bpy.props.EnumProperty(name="CFDMenu", items=items_list, description="CFD menu categories", default="System")
 
     showCoeffs: bpy.props.BoolProperty(name="showCoeffs", description="Show advanced wall coefficients", default=False)

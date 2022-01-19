@@ -34,18 +34,19 @@ def remove(module):
     update_mainmenu(items_list)
 
 def mainmenu_loaded():
-    from procedural_compute.core.properties import BM_SCENE_ODS
-    return len(BM_SCENE_ODS.__annotations__['mainMenu'].keywords['items']) > 0
+    from procedural_compute.core.properties import SCENE_PT_COMPUTE_CORE
+    return len(SCENE_PT_COMPUTE_CORE.__annotations__['mainMenu'].keywords['items']) > 0
 
 def update_mainmenu(items_list):
+    _props = bpy.types.SCENE_PT_COMPUTE_CORE
     if len(items_list) == 0:
-        bpy.types.BM_SCENE_ODS.mainMenu = bpy.props.EnumProperty(
+        _props.mainMenu = bpy.props.EnumProperty(
             name="mainMenu",
             items=items_list,
             description="ODS menu categories"
         )
     else:
-        bpy.types.BM_SCENE_ODS.mainMenu = bpy.props.EnumProperty(
+        _props.mainMenu = bpy.props.EnumProperty(
             name="mainMenu",
             items=items_list,
             description="ODS menu categories",

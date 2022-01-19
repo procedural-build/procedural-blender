@@ -7,7 +7,7 @@
 ###########################################################
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 from procedural_compute.cfd.properties.object.patches.scalar import ODS_CFD_PATCH_SCALAR
 from procedural_compute.cfd.properties.object.patches.vector import ODS_CFD_PATCH_VECTOR
 
@@ -17,7 +17,7 @@ class BM_OBJ_CFD_PATCHFIELD(bpy.types.PropertyGroup):
     volScalarField: bpy.props.PointerProperty(type=ODS_CFD_PATCH_SCALAR)
     volVectorField: bpy.props.PointerProperty(type=ODS_CFD_PATCH_VECTOR)
 
-    items_list = makeTuples(["volVectorField", "volScalarField"])
+    items_list = make_tuples(["volVectorField", "volScalarField"])
     classType: bpy.props.EnumProperty(name="classType", items=items_list, description="classType", default="volScalarField")
 
     def setValue(self, value, var='value'):

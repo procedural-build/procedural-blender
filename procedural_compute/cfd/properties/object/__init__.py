@@ -8,7 +8,7 @@
 
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 from procedural_compute.core.utils.blendmeUtils import drawCollectionTemplateList
 
 import procedural_compute.cfd.solvers
@@ -40,7 +40,7 @@ class BM_OBJ_CFD(bpy.types.PropertyGroup):
 
     ##################################
 
-    items_list = makeTuples(["wall", "wallSlip", "fixedPressure", "fixedPressureOutOnly", "fixedVelocity", "custom"])
+    items_list = make_tuples(["wall", "wallSlip", "fixedPressure", "fixedPressureOutOnly", "fixedVelocity", "custom"])
     preset: bpy.props.EnumProperty(name="preset", items=items_list, description="Preset", default="wall", update=setFields)
 
     doMesh: bpy.props.BoolProperty(name="doMesh", default=True, description="Include in Meshing")
@@ -57,7 +57,7 @@ class BM_OBJ_CFD(bpy.types.PropertyGroup):
     # Dcoeff is the Darcy component that relates to v
 
     source_isSource: bpy.props.BoolProperty(name="isSource", default=False, description="Is this object a scalar Source")
-    items_list = makeTuples(["absolute", "specific"])
+    items_list = make_tuples(["absolute", "specific"])
     source_volMode: bpy.props.EnumProperty(name="volMode", items=items_list, description="Volume Mode (specific = amount/m3)", default="specific")
     source_expRate: bpy.props.FloatProperty(name="expRate", description="Explicit Rate", default=1.0)
     source_impRate: bpy.props.FloatProperty(name="impRate", description="Implicit Rate", default=0.0)

@@ -8,7 +8,7 @@
 
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 
 ###########
 
@@ -35,7 +35,7 @@ class BM_OBJ_CFD_MESH(bpy.types.PropertyGroup):
 
     makeRefinementRegion: bpy.props.BoolProperty(name="refinementRegion", default=False, description="Make this object a Refinement Region")
     makeCellSet: bpy.props.BoolProperty(name="cellSet", default=False, description="Make this object a cellSet")
-    items_list = makeTuples(["distance", "inside", "outside", "surface"])
+    items_list = make_tuples(["distance", "inside", "outside", "surface"])
     refinementMode: bpy.props.EnumProperty(name="mode", items=items_list, description="Preset", default="inside", update=setLevel)
     distanceLevels: bpy.props.StringProperty(name="levels", description="Levels at Distances: (distance level)", default="((1 4))")
 

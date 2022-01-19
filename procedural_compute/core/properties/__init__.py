@@ -9,3 +9,4 @@
 
 from .scene import *
 from .site import *
+from .auth import *

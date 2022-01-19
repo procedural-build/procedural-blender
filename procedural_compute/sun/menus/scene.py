@@ -18,7 +18,7 @@ def drawBasic(self, context):
     sc = context.scene
 
     # Skip this menu if the mainMenu is not pointing to Sun
-    if sc.ODS.mainMenu != "SunPath":
+    if sc.Compute.mainMenu != "SunPath":
         return
 
     # Syncronise the time variables with the frame

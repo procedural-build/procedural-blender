@@ -8,7 +8,7 @@
 
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 
 
 def recalcsunpath(self, context):
@@ -17,12 +17,13 @@ def recalcsunpath(self, context):
     return None
 
 
+
 # Import properties from submodules
-class BM_SCENE_SITE(bpy.types.PropertyGroup):
+class SCENE_PT_COMPUTE_CORE_SITE(bpy.types.PropertyGroup):
 
     terrain: bpy.props.EnumProperty(
         name="Terrain",
-        items=makeTuples(["Suburbs", "Country", "City", "Ocean", "Urban"]),
+        items=make_tuples(["Suburbs", "Country", "City", "Ocean", "Urban"]),
         description="Set terrain type",
         default="Country"
     )
@@ -35,13 +36,25 @@ class BM_SCENE_SITE(bpy.types.PropertyGroup):
     timezone: bpy.props.FloatProperty(name="TimeZone", step=1, precision=2, description="Time Zone", default=8.0, min=-12.0, max=12.0, update=recalcsunpath)
     elevation: bpy.props.FloatProperty(name="Elevation", step=1, precision=2, description="Site Elevation")
 
-    def idfText(self):
-        text = "Site:Location,\n%s,\n%s,\n%s,\n%s,\n%s;\n\n"%(self.location, self.latitude, self.longitude, self.timezone, self.elevation)
-        return text
+    def draw_menu(self, layout):
+        sc = context.scene
+        # General site settings
+        layout.row().prop(self, "buildingName")
+        layout.row().prop(self, "location")
 
+        split = layout.split()
+        col = split.column()
+        col.prop(self, "latitude")
+        col.prop(self, "longitude")
+        col.prop(self, "northAxis")
+        col = split.column()
+        col.prop(self, "timezone")
+        col.prop(self, "elevation")
+        col.prop(self, "terrain", expand=False)
+        return
 
-bpy.utils.register_class(BM_SCENE_SITE)
+bpy.utils.register_class(SCENE_PT_COMPUTE_CORE_SITE)
 
 ##############
 # Point from Scene to ODS variables
-bpy.types.Scene.Site = bpy.props.PointerProperty(type=BM_SCENE_SITE)
+#bpy.types.Scene.Site = bpy.props.PointerProperty(type=COMPUTE_CORE_SCENE_SITE)

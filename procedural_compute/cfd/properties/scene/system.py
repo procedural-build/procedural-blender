@@ -8,7 +8,7 @@
 
 
 import bpy
-from procedural_compute.core.utils.selectUtils import makeTuples
+from procedural_compute.core.utils import make_tuples
 from procedural_compute.core.utils.compute.auth import USER
 
 
@@ -33,7 +33,7 @@ class BM_SCENE_CFDSystem(bpy.types.PropertyGroup):
 
     # Legacy system settings from ODS Studio
     runMPI: bpy.props.BoolProperty(name="runMPI", description="Do MPIRun", default=False)
-    items_list = makeTuples(["simple", "hierarchical"])
+    items_list = make_tuples(["simple", "hierarchical"])
     decompMethod: bpy.props.EnumProperty(name="decompMethod", items=items_list, description="Decomposition Method", default="hierarchical")
     numSubdomains: bpy.props.IntProperty(name="SubDomains", min=1, description="Number of SubDomains for Parallel Processing")
     decompN: bpy.props.IntVectorProperty(name="Nxyz", description="Splits in XYZ", default=(1, 1, 1), min=1)
