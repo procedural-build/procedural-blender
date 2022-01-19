@@ -18,6 +18,6 @@ from procedural_compute.core.utils.blendmeUtils import drawCollectionTemplateLis
 
 def drawBasic(self, context):
     # Skip this menu if the mainMenu is not pointing to Radiance
-    if context.scene.ODS.mainMenu != "Radiance":
+    if context.scene.Compute.mainMenu != "Radiance":
         return
     context.scene.RAD.draw(self.layout)

@@ -8,7 +8,7 @@
 
 """
 A base-module of classes and function definitions that are
-called by other modules of the ODS Suite
+called by other modules of the Compute addon
 """
 
 import bpy

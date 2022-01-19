@@ -1,6 +1,6 @@
 ###########################################################
 # Blender Addon for Procedural Cloud-based Design Tools
-# Copyright (C) 2011, ODS-Engineering
+# Copyright (C) 2021, Procedural
 # License: ods-engineering license
 # Version: 1.2
 # Web    : www.ods-engineering.com

@@ -1,6 +1,6 @@
 ###########################################################
 # Blender Addon for Procedural Cloud-based Design Tools
-# Copyright (C) 2011, ODS-Engineering
+# Copyright (C) 2021, Procedural
 # License : procedural.build license
 # Version : 1.2
 # Web     : www.procedural.build
@@ -20,7 +20,7 @@ from procedural_compute.core.utils.compute.view import GenericViewSet
 
 
 def get_system_properties():
-    system_settings = bpy.context.scene.ODS.system
+    system_settings = bpy.context.scene.Compute.system
     project_id = system_settings.project_id
     task_id = system_settings.task_id
     return (project_id, task_id, control_properties, solver_properties, system_settings)
