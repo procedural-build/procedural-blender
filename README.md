@@ -1,6 +1,6 @@
 # Blender (2.82+) Python addons for Procedural APIs
 
-Scripts, components and utilities for Blender 2.82+
+Scripts, components and utilities for Blender 2.82 (or higher)
 
 ## Installing the addon
 
@@ -22,8 +22,17 @@ into Blender as per the instructions above.
 
 ## Linking code for development
 
+### On Linux
+
 For development you can symbolically link the module source code directly into your
 blender scripts folder with the command:
 ```
 ./link.sh
+```
+
+### On Windows 
+
+Open `Powershell` or a `Command Prompt` **as Administrator**.  Then run the bat script:
+```
+./link.bat
 ```
