@@ -40,4 +40,4 @@ bpy.utils.register_class(BM_SCENE_CFD)
 
 ##############
 # Point from Scene to ODS variables
-bpy.types.Scene.ODS_CFD = bpy.props.PointerProperty(type=BM_SCENE_CFD)
+bpy.types.Scene.Compute.CFD = bpy.props.PointerProperty(type=BM_SCENE_CFD)

@@ -19,7 +19,7 @@ import json
 
 
 def getSolver():
-    return getattr(procedural_compute.cfd.solvers, bpy.context.scene.ODS_CFD.solver.name)
+    return getattr(procedural_compute.cfd.solvers, bpy.context.scene.Compute.CFD.solver.name)
 
 
 def setFields(self, context):
@@ -78,14 +78,14 @@ class BM_OBJ_CFD(bpy.types.PropertyGroup):
         '''
         L.row().prop(self, "preset", expand=False)
         sc = bpy.context.scene
-        if 'porous' in sc.ODS_CFD.solver.name:
+        if 'porous' in sc.Compute.CFD.solver.name:
             L.row().prop(self, "porous_isPorous")
             if self.porous_isPorous:
                 L.row().prop(self, "porous_Dcoeff", expand=True)
                 L.row().prop(self, "porous_Fcoeff", expand=True)
                 return None
 
-        if 'scalarSource' in sc.ODS_CFD.solver.name:
+        if 'scalarSource' in sc.Compute.CFD.solver.name:
             L.row().prop(self, "source_isSource")
             if self.source_isSource:
                 split = L.split()
@@ -166,4 +166,4 @@ class BM_OBJ_CFD(bpy.types.PropertyGroup):
 bpy.utils.register_class(BM_OBJ_CFD)
 #####################
 
-bpy.types.Object.ODS_CFD = bpy.props.PointerProperty(type=BM_OBJ_CFD)
+bpy.types.Object.Compute.CFD = bpy.props.PointerProperty(type=BM_OBJ_CFD)

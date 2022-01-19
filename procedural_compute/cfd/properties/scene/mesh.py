@@ -61,7 +61,7 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
 
     def drawMenu(self, layout):
         sc = bpy.context.scene
-        layout.box().row().prop(sc.ODS_CFD.system, "caseDir")
+        layout.box().row().prop(sc.Compute.CFD.system, "caseDir")
 
         split = layout.split()
         col = split.column()
@@ -118,7 +118,7 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
             col.operator("scene.cfdoperators", text="blockMesh").command = "runFoamBlockMesh"
             col.operator("scene.cfdoperators", text="snappyHexMesh").command = "runFoamSnapMesh"
             #col.operator("scene.cfdoperators", text="postMeshUtils").command = "runPostMeshUtils"
-            if sc.ODS_CFD.system.runMPI:
+            if sc.Compute.CFD.system.runMPI:
                 col = split.column()
                 col.operator("scene.cfdoperators", text="decomposePar").command = "decomposePar"
                 col.operator("scene.cfdoperators", text="reconstructParMesh").command = "reconstructParMesh"
@@ -207,7 +207,7 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
     def get_set_sets(self):
         keep_point = self.get_unique_object('cfdMeshKeepPoint')
         keep_point_co = [co for co in keep_point.location]
-        set_set_objs = [o for o in bpy.context.visible_objects if o.ODS_CFD.mesh.makeCellSet]
+        set_set_objs = [o for o in bpy.context.visible_objects if o.Compute.CFD.mesh.makeCellSet]
         return [self.get_set_set(obj, keep_point=keep_point_co) for obj in set_set_objs]
 
     def domain_json(self):
@@ -232,7 +232,7 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
 
     def exclude_object(self, obj):
         special_names = ['cfdBoundingBox','cfdMeshKeepPoint', 'MinX', 'MaxX', 'MinY', 'MaxY', 'MinZ', 'MaxZ']
-        return (obj.ODS_CFD.mesh.makeRefinementRegion or obj.ODS_CFD.mesh.makeCellSet) or (obj.name.split('.')[0] in special_names)
+        return (obj.Compute.CFD.mesh.makeRefinementRegion or obj.Compute.CFD.mesh.makeCellSet) or (obj.name.split('.')[0] in special_names)
 
     def snappy_json(self):
         objects = [o for o in bpy.context.visible_objects if not self.exclude_object(o)]
@@ -249,8 +249,8 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
         surface_dict = {
             foamUtils.formatObjectName(o.name): {
                 'level': {
-                    'min': o.ODS_CFD.mesh.meshMinLevel,
-                    'max': o.ODS_CFD.mesh.meshMaxLevel
+                    'min': o.Compute.CFD.mesh.meshMinLevel,
+                    'max': o.Compute.CFD.mesh.meshMaxLevel
                 }
             } for o in objects
         }
@@ -260,10 +260,10 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
             {
                 'name': foamUtils.formatObjectName(o.name),
                 'details': {
-                    'mode': o.ODS_CFD.mesh.refinementMode,
-                    'levels': o.ODS_CFD.mesh.distanceLevels
+                    'mode': o.Compute.CFD.mesh.refinementMode,
+                    'levels': o.Compute.CFD.mesh.distanceLevels
                 }
-            } for o in bpy.context.visible_objects if o.ODS_CFD.mesh.makeRefinementRegion
+            } for o in bpy.context.visible_objects if o.Compute.CFD.mesh.makeRefinementRegion
         ]
 
         # Overrides

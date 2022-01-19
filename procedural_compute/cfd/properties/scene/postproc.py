@@ -47,7 +47,7 @@ class BM_SCENE_CFDPostProc(bpy.types.PropertyGroup):
 
         # Only use this if you want to pull down the case
         box = layout.box()
-        box.row().prop(sc.ODS_CFD.system, "caseDir")
+        box.row().prop(sc.Compute.CFD.system, "caseDir")
         box.row().operator("scene.compute_cfdoperators", text="Pull folder", ).command = "pull_to_local"
 
         # Open Paraview

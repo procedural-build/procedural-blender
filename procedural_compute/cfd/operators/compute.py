@@ -29,9 +29,9 @@ from .utils import get_sets_from_selected, color_object
 
 
 def get_system_properties():
-    system_settings = bpy.context.scene.ODS_CFD.system
-    solver_properties = bpy.context.scene.ODS_CFD.solver
-    control_properties = bpy.context.scene.ODS_CFD.control
+    system_settings = bpy.context.scene.Compute.CFD.system
+    solver_properties = bpy.context.scene.Compute.CFD.solver
+    control_properties = bpy.context.scene.Compute.CFD.control
     project_id = system_settings.project_id
     task_id = system_settings.task_id
     return (project_id, task_id, control_properties, solver_properties, system_settings)
@@ -63,14 +63,14 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
     def refresh(self):
         """ """
-        system_settings = bpy.context.scene.ODS_CFD.system
+        system_settings = bpy.context.scene.Compute.CFD.system
         print(f"REFRESHING USER TOKEN: {USER[0].token}")
         USER[0].refresh_token()
         system_settings.access_token = USER[0].token
         system_settings.expire_time = "%.02f"%(USER[0].token_exp_time)
 
     def get_or_create_project_and_task(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
+        system_settings = bpy.context.scene.Compute.CFD.system
         project_name = system_settings.project_name.strip()
         project_number = system_settings.project_number
         task_name = system_settings.task_name.strip()
@@ -114,7 +114,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         }
 
     def upload_geometry(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
+        system_settings = bpy.context.scene.Compute.CFD.system
         task_id = system_settings.task_id
 
         geometry_objects = [obj for obj in bpy.context.visible_objects if not self._separate_stl(obj)]
@@ -136,14 +136,14 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return response
 
     def _separate_stl(self, obj):
-        return obj.ODS_CFD.mesh.makeRefinementRegion or obj.ODS_CFD.mesh.makeCellSet
+        return obj.Compute.CFD.mesh.makeRefinementRegion or obj.Compute.CFD.mesh.makeCellSet
 
     def _has_cellsets(self):
-        cellset_objects = [obj for obj in bpy.context.visible_objects if obj.ODS_CFD.mesh.makeCellSet]
+        cellset_objects = [obj for obj in bpy.context.visible_objects if obj.Compute.CFD.mesh.makeCellSet]
         return True if cellset_objects else False
 
     def upload_separate_surfaces(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
+        system_settings = bpy.context.scene.Compute.CFD.system
         task_id = system_settings.task_id
 
         print("Writing refinement regions")
@@ -164,10 +164,10 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             )
 
     def upload_setset(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
+        system_settings = bpy.context.scene.Compute.CFD.system
         task_id = system_settings.task_id
 
-        cellset_objects = [obj for obj in bpy.context.visible_objects if obj.ODS_CFD.mesh.makeCellSet]
+        cellset_objects = [obj for obj in bpy.context.visible_objects if obj.Compute.CFD.mesh.makeCellSet]
         if not cellset_objects:
             return None
 
@@ -210,9 +210,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
     def write_mesh_files(self):
         """ Upload the geometry and dispatch the task in one operation
         """
-        system_settings = bpy.context.scene.ODS_CFD.system
-        mesh_properties = bpy.context.scene.ODS_CFD.mesh
-        solver_properties = bpy.context.scene.ODS_CFD.solver
+        system_settings = bpy.context.scene.Compute.CFD.system
+        mesh_properties = bpy.context.scene.Compute.CFD.mesh
+        solver_properties = bpy.context.scene.Compute.CFD.solver
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
@@ -239,8 +239,8 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return setup_task
 
     def write_solver_files(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
-        solver_properties = bpy.context.scene.ODS_CFD.solver
+        system_settings = bpy.context.scene.Compute.CFD.system
+        solver_properties = bpy.context.scene.Compute.CFD.solver
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
@@ -268,7 +268,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
 
     def run_mesh_pipeline(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
+        system_settings = bpy.context.scene.Compute.CFD.system
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
@@ -290,7 +290,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             "foamToSurface -constant surfaceMesh.obj"
         ]
 
-        cellset_objects = [obj for obj in bpy.context.visible_objects if obj.ODS_CFD.mesh.makeCellSet]
+        cellset_objects = [obj for obj in bpy.context.visible_objects if obj.Compute.CFD.mesh.makeCellSet]
         if len(cellset_objects) > 0:
             commands.append("!setSet -batch zones.setSet")
 
@@ -313,9 +313,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return mesh_task
 
     def run_solver(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
-        solver_properties = bpy.context.scene.ODS_CFD.solver
-        control_properties = bpy.context.scene.ODS_CFD.control
+        system_settings = bpy.context.scene.Compute.CFD.system
+        solver_properties = bpy.context.scene.Compute.CFD.solver
+        control_properties = bpy.context.scene.Compute.CFD.control
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
@@ -354,10 +354,10 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return solver_task
 
     def run_wind_tunnel(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
-        solver_properties = bpy.context.scene.ODS_CFD.solver
-        mesh_properties = bpy.context.scene.ODS_CFD.mesh
-        control_properties = bpy.context.scene.ODS_CFD.control
+        system_settings = bpy.context.scene.Compute.CFD.system
+        solver_properties = bpy.context.scene.Compute.CFD.solver
+        mesh_properties = bpy.context.scene.Compute.CFD.mesh
+        control_properties = bpy.context.scene.Compute.CFD.control
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
@@ -399,9 +399,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return solver_task
 
     def run_wind_thresholds(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
-        solver_properties = bpy.context.scene.ODS_CFD.solver
-        control_properties = bpy.context.scene.ODS_CFD.control
+        system_settings = bpy.context.scene.Compute.CFD.system
+        solver_properties = bpy.context.scene.Compute.CFD.solver
+        control_properties = bpy.context.scene.Compute.CFD.control
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
@@ -427,9 +427,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return solver_task
 
     def clean_processor_dirs(self, path_prefix="foam"):
-        system_settings = bpy.context.scene.ODS_CFD.system
-        solver_properties = bpy.context.scene.ODS_CFD.solver
-        control_properties = bpy.context.scene.ODS_CFD.control
+        system_settings = bpy.context.scene.Compute.CFD.system
+        solver_properties = bpy.context.scene.Compute.CFD.solver
+        control_properties = bpy.context.scene.Compute.CFD.control
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
@@ -454,9 +454,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             time.sleep(0.05)     # Sleep for a bit to avoid throttling
 
     def clean_mesh_files(self, path_prefix="foam/constant"):
-        system_settings = bpy.context.scene.ODS_CFD.system
-        solver_properties = bpy.context.scene.ODS_CFD.solver
-        control_properties = bpy.context.scene.ODS_CFD.control
+        system_settings = bpy.context.scene.Compute.CFD.system
+        solver_properties = bpy.context.scene.Compute.CFD.solver
+        control_properties = bpy.context.scene.Compute.CFD.control
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
@@ -490,9 +490,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             time.sleep(0.05)     # Sleep for a bit to avoid throttling
 
     def probe_selected(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
-        solver_properties = bpy.context.scene.ODS_CFD.solver
-        postproc_properties = bpy.context.scene.ODS_CFD.postproc
+        system_settings = bpy.context.scene.Compute.CFD.system
+        solver_properties = bpy.context.scene.Compute.CFD.solver
+        postproc_properties = bpy.context.scene.Compute.CFD.postproc
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 
@@ -536,9 +536,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
     def load_selected_probes(self):
         from procedural_compute.core.operators import fetch_async, fetch_sync
 
-        system_settings = bpy.context.scene.ODS_CFD.system
-        solver_properties = bpy.context.scene.ODS_CFD.solver
-        postproc_properties = bpy.context.scene.ODS_CFD.postproc
+        system_settings = bpy.context.scene.Compute.CFD.system
+        solver_properties = bpy.context.scene.Compute.CFD.solver
+        postproc_properties = bpy.context.scene.Compute.CFD.postproc
         project_id = system_settings.project_id
         task_id = system_settings.task_id
 

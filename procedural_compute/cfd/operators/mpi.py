@@ -20,7 +20,7 @@ class getNumSubdomains(bpy.types.Operator):
 
     def execute(self, context):
         sc = context.scene
-        sc.ODS_CFD.system.numSubdomains = max(sc.ODS_CFD.system.decompN[0]*sc.ODS_CFD.system.decompN[1]*sc.ODS_CFD.system.decompN[2],1)
+        sc.Compute.CFD.system.numSubdomains = max(sc.Compute.CFD.system.decompN[0]*sc.Compute.CFD.system.decompN[1]*sc.Compute.CFD.system.decompN[2],1)
         return{'FINISHED'}
 bpy.utils.register_class(getNumSubdomains)
 

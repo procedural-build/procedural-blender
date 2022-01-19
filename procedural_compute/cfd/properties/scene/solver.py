@@ -13,7 +13,7 @@ from procedural_compute.cfd.properties.scene.turbulence import BM_SCENE_CFDSolve
 from procedural_compute.cfd.properties.scene.turbulence import BM_SCENE_CFDSolver_LES
 
 
-class ODS_CFD_FIELD_VECTOR(bpy.types.PropertyGroup):
+class Compute.CFD_FIELD_VECTOR(bpy.types.PropertyGroup):
 
     value: bpy.props.FloatVectorProperty(name="value", description="Default Value", default=(0, 0, 0))
 
@@ -24,10 +24,10 @@ class ODS_CFD_FIELD_VECTOR(bpy.types.PropertyGroup):
         layout.row().prop(self, "value")
 
 
-bpy.utils.register_class(ODS_CFD_FIELD_VECTOR)
+bpy.utils.register_class(Compute.CFD_FIELD_VECTOR)
 
 
-class ODS_CFD_FIELD_SCALAR(bpy.types.PropertyGroup):
+class Compute.CFD_FIELD_SCALAR(bpy.types.PropertyGroup):
 
     value: bpy.props.FloatProperty(name="value", description="Default Value", default=0)
 
@@ -38,12 +38,12 @@ class ODS_CFD_FIELD_SCALAR(bpy.types.PropertyGroup):
         layout.row().prop(self, "value")
 
 
-bpy.utils.register_class(ODS_CFD_FIELD_SCALAR)
+bpy.utils.register_class(Compute.CFD_FIELD_SCALAR)
 
 
-class ODS_CFD_FIELDS(bpy.types.PropertyGroup):
-    volScalarField: bpy.props.PointerProperty(type=ODS_CFD_FIELD_SCALAR)
-    volVectorField: bpy.props.PointerProperty(type=ODS_CFD_FIELD_VECTOR)
+class Compute.CFD_FIELDS(bpy.types.PropertyGroup):
+    volScalarField: bpy.props.PointerProperty(type=Compute.CFD_FIELD_SCALAR)
+    volVectorField: bpy.props.PointerProperty(type=Compute.CFD_FIELD_VECTOR)
     items_list = make_tuples(["volVectorField", "volScalarField"])
     classType: bpy.props.EnumProperty(name="classType", items=items_list, description="classType", default="volScalarField")
     dim: bpy.props.StringProperty(name="dim", default="[0,1,-1,0,0,0,0]")
@@ -61,7 +61,7 @@ class ODS_CFD_FIELDS(bpy.types.PropertyGroup):
         return None
 
 
-bpy.utils.register_class(ODS_CFD_FIELDS)
+bpy.utils.register_class(Compute.CFD_FIELDS)
 
 
 class BM_SCENE_CFDSolver(bpy.types.PropertyGroup):
@@ -85,7 +85,7 @@ class BM_SCENE_CFDSolver(bpy.types.PropertyGroup):
 
     nu: bpy.props.FloatProperty(name="nu", step=1, precision=5, description="Kinematic Viscosity (nu)", default=1.5e-5)
 
-    fields: bpy.props.CollectionProperty(type=ODS_CFD_FIELDS, name="fields", description="Fields")
+    fields: bpy.props.CollectionProperty(type=Compute.CFD_FIELDS, name="fields", description="Fields")
     active_fields_index: bpy.props.IntProperty()
 
     # Define the overrides here (as pointers to Blender text blocks)
@@ -126,7 +126,7 @@ class BM_SCENE_CFDSolver(bpy.types.PropertyGroup):
 
         skip_names = ['cfdBoundingBox','cfdMeshKeepPoint']
         bcs = {
-            formatObjectName(obj.name): obj.ODS_CFD.to_json()
+            formatObjectName(obj.name): obj.Compute.CFD.to_json()
             for obj in objects if not obj.name in skip_names
         }
 

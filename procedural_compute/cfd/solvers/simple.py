@@ -16,8 +16,8 @@ from .potential import potentialFoam
 
 def turbModel():
     sc = bpy.context.scene
-    turbModel = sc.ODS_CFD.solver.turbModel
-    m = getattr(sc.ODS_CFD.solver, sc.ODS_CFD.solver.turbModel)
+    turbModel = sc.Compute.CFD.solver.turbModel
+    m = getattr(sc.Compute.CFD.solver, sc.Compute.CFD.solver.turbModel)
     subModel = m.model
     return (turbModel, subModel)
 
@@ -139,14 +139,14 @@ class simpleFoam(potentialFoam):
 
             def writeBody(self):
                 sc = bpy.context.scene
-                turbModel = sc.ODS_CFD.solver.turbModel
+                turbModel = sc.Compute.CFD.solver.turbModel
                 if turbModel == "Laminar":
                     self.writeString("simulationType  Laminar", endl=";\n\n")
                 else:
                     self.writeString("simulationType  %s"%(turbModel), endl=";\n\n")
 
                     if turbModel == 'RAS':
-                        m = getattr(sc.ODS_CFD.solver, turbModel)
+                        m = getattr(sc.Compute.CFD.solver, turbModel)
                         subModel = m.model
                         self.writeString("RAS { RASModel %s; turbulence on; printCoeffs off; }" % subModel, endl="\n\n")
 
@@ -156,7 +156,7 @@ class simpleFoam(potentialFoam):
             def writeBody(self):
                 sc = bpy.context.scene
                 self.writeString("transportModel Newtonian", endl=";\n\n")
-                self.writeString("nu              nu [ 0 2 -1 0 0 0 0 ] %f"%(sc.ODS_CFD.solver.nu), endl=";\n\n")
+                self.writeString("nu              nu [ 0 2 -1 0 0 0 0 ] %f"%(sc.Compute.CFD.solver.nu), endl=";\n\n")
 
         class RASproperties(genericFoamFile):
             filepath = 'constant/RASProperties'
@@ -168,8 +168,8 @@ class simpleFoam(potentialFoam):
 
             def writeBody(self):
                 sc = bpy.context.scene
-                turbModel = sc.ODS_CFD.solver.turbModel
-                m = getattr(sc.ODS_CFD.solver, sc.ODS_CFD.solver.turbModel)
+                turbModel = sc.Compute.CFD.solver.turbModel
+                m = getattr(sc.Compute.CFD.solver, sc.Compute.CFD.solver.turbModel)
                 subModel = m.model
                 self.writeString("RASModel %s"%(subModel), endl=";\n\n")
                 self.writeString("turbulence      %s"%(self.turbOn(turbModel)), endl=";\n\n")

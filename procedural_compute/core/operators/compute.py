@@ -52,14 +52,14 @@ class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
 
     def refresh(self):
         """ """
-        system_settings = bpy.context.scene.ODS_CFD.system
+        system_settings = bpy.context.scene.Compute.CFD.system
         logger.info(f"REFRESHING USER TOKEN: {USER[0].token}")
         USER[0].refresh_token()
         system_settings.access_token = USER[0].token
         system_settings.expire_time = "%.02f"%(USER[0].token_exp_time)
 
     def get_or_create_project_and_task(self):
-        system_settings = bpy.context.scene.ODS_CFD.system
+        system_settings = bpy.context.scene.Compute.CFD.system
         project_name = system_settings.project_name.strip()
         project_number = system_settings.project_number
         task_name = system_settings.task_name.strip()

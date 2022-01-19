@@ -48,7 +48,7 @@ class BM_OBJ_CFD_MESH(bpy.types.PropertyGroup):
 
         split.column().prop(self, "meshMinLevel")
         split.column().prop(self, "meshMaxLevel")
-        if sc.ODS_CFD.mesh.addLayers:
+        if sc.Compute.CFD.mesh.addLayers:
             split.column().prop(self, "nSurfaceLayers")
 
         # Make Refinement Region

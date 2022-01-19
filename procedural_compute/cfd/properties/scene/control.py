@@ -112,20 +112,20 @@ class BM_SCENE_CFDControl(bpy.types.PropertyGroup):
         row.prop(self, "timeFormat", expand=False)
         row.prop(self, "timePrecision")
         layout.row().prop(self, "runTimeModifiable")
-        if "ageing" in sc.ODS_CFD.solver.name:
+        if "ageing" in sc.Compute.CFD.solver.name:
             layout.row().prop(self, "solveFlow")
         '''
 
     def getText(self):
         sc = bpy.context.scene
         t = ""
-        t += "application        %s;\n\n"%(sc.ODS_CFD.solver.name)
+        t += "application        %s;\n\n"%(sc.Compute.CFD.solver.name)
         t += "startFrom          %s;\n\n"%(self.startFrom)
         t += "startTime          %f;\n\n"%(self.startTime)
         t += "stopAt             %s;\n\n"%(self.stopAt)
         t += "endTime            %f;\n\n"%(self.endTime)
         t += "deltaT             %f;\n\n"%(self.deltaT)
-        if sc.ODS_CFD.control.adjustTimeStep:
+        if sc.Compute.CFD.control.adjustTimeStep:
             t += "adjustTimeStep     yes;\n\n"
             t += "maxCo              %f;\n\n"%(self.maxCo)
             t += "maxDeltaT          %f;\n\n"%(self.deltaT)
@@ -139,11 +139,11 @@ class BM_SCENE_CFDControl(bpy.types.PropertyGroup):
         t += "timePrecision      %i;\n\n"%(self.timePrecision)
         t += "runTimeModifiable  %s;\n\n"%(str(self.runTimeModifiable).lower())
         # Added strings for ageingScalarTransportFoam
-        #if "ageing" in sc.ODS_CFD.solver.name:
+        #if "ageing" in sc.Compute.CFD.solver.name:
         #    t += "solveFlow %s;"%(str(self.solveFlow).lower())
         # Write the added user-defined libraries
         libs = []
-        #if "buoyant" in sc.ODS_CFD.solver.name:
+        #if "buoyant" in sc.Compute.CFD.solver.name:
         #    libs.append("\"libcompressibleTurbulenceModel.so\"")
         #if getNumberOfPatchType('outletMappedUniformInlet') > 0 or getNumberOfPatchType('swirl') > 0:
         #    libs.append("\"libFvPatchFieldsODS.so\"")

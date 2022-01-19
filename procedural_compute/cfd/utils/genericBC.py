@@ -39,7 +39,7 @@ class genericBoundaryCondition(genericFoamFile):
         (objs, names) = selectedObjectsAndNames()
         for i in range(len(objs)):
             self.f.write("    %s\n"%(names[i]))
-            self.f.write(objs[i].ODS_CFD.getText(self.field))
+            self.f.write(objs[i].Compute.CFD.getText(self.field))
         return
 
     def formatInput(self,s):

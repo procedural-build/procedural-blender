@@ -72,17 +72,17 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         sc = bpy.context.scene
         obs = bpy.context.selected_objects
         for o in obs:
-            if o.ODS_CFD.mesh.makeRefinementRegion:
+            if o.Compute.CFD.mesh.makeRefinementRegion:
                 o.select_set(False)
 
-        if 'porous' not in sc.ODS_CFD.solver.name:
+        if 'porous' not in sc.Compute.CFD.solver.name:
             asciiSTLExport.writeTriSurface()
         else:
             asciiSTLExport.writeTriSurface(writePorous=False)
             for o in obs:
                 o.select_set(False)
             for o in obs:
-                if o.ODS_CFD.porous_isPorous:
+                if o.Compute.CFD.porous_isPorous:
                     o.select_set(True)
                     fname = procedural_compute.cfd.utils.foamUtils.formatObjectName(o.name) + '.stl'
                     asciiSTLExport.writeTriSurface(filename="constant/triSurface/%s"%(fname), writeNonPorous=False)
@@ -94,7 +94,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         for o in obs:
             o.select_set(False)
         for o in obs:
-            if o.ODS_CFD.mesh.makeRefinementRegion:
+            if o.Compute.CFD.mesh.makeRefinementRegion:
                 o.select_set(True)
                 fname = procedural_compute.cfd.utils.foamUtils.formatObjectName(o.name) + '.stl'
                 asciiSTLExport.writeTriSurface(filename="constant/triSurface/%s"%(fname), writePorous=True, writeNonPorous=True)
@@ -106,7 +106,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
     def snapCFDBoundingBox(self):
         sc = bpy.context.scene
         bb = bpy.data.objects['cfdBoundingBox']
-        ds = sc.ODS_CFD.mesh.blockMeshSize
+        ds = sc.Compute.CFD.mesh.blockMeshSize
         for i in range(3):
             bb.scale[i] = round((bb.scale[i] / ds)) * ds
         return{'FINISHED'}
@@ -145,7 +145,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         print("Writing controlDict")
         #foamCaseFiles.controlDict().write()
         sc = bpy.context.scene
-        solver = sc.ODS_CFD.solver.name
+        solver = sc.Compute.CFD.solver.name
         if hasattr(procedural_compute.cfd.solvers, solver):
             s = getattr(procedural_compute.cfd.solvers, solver)
             s().caseFiles().controlDict().write()
@@ -154,7 +154,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
     def writeSolverFiles(self):
         sc = bpy.context.scene
-        solver = sc.ODS_CFD.solver.name
+        solver = sc.Compute.CFD.solver.name
 
         if hasattr(procedural_compute.cfd.solvers, solver):
             s = getattr(procedural_compute.cfd.solvers, solver)
@@ -167,7 +167,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
     def sourceFoam(self):
         sc = bpy.context.scene
-        ofDir = sc.ODS_CFD.homedir
+        ofDir = sc.Compute.CFD.homedir
 
         # Check if the OpenFOAM directory exists
         if not os.path.exists(ofDir):
@@ -187,7 +187,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return{'FINISHED'}
 
     def getMpiCall(self):
-        CFD = bpy.context.scene.ODS_CFD
+        CFD = bpy.context.scene.Compute.CFD
         if not CFD.system.runMPI:
             return ""
         bpy.ops.scene.getnumsubdomains()
@@ -203,12 +203,12 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return "-parallel" if self.getMpiCall() else ""
 
     def caseDir(self):
-        return bpy.path.abspath(bpy.context.scene.ODS_CFD.system.caseDir)
+        return bpy.path.abspath(bpy.context.scene.Compute.CFD.system.caseDir)
 
     def basicMesh(self):
-        mpi = bpy.context.scene.ODS_CFD.system.runMPI
+        mpi = bpy.context.scene.Compute.CFD.system.runMPI
         self.runFoamBlockMesh()
-        if bpy.context.scene.ODS_CFD.mesh.nFeatureSnapIter > 0:
+        if bpy.context.scene.Compute.CFD.mesh.nFeatureSnapIter > 0:
             self.runFoamSurfaceFeatureExtract()
         if mpi:
             self.decomposePar()
@@ -219,7 +219,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return None
 
     def basicRun(self):
-        mpi = bpy.context.scene.ODS_CFD.system.runMPI
+        mpi = bpy.context.scene.Compute.CFD.system.runMPI
         if mpi:
             self.decomposePar()
         self.runFoamCase()
@@ -273,7 +273,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return None
 
     def runFoamCase(self):
-        CFD = bpy.context.scene.ODS_CFD
+        CFD = bpy.context.scene.Compute.CFD
         cmd = "%s %s %s | tee -a log.txt"%(self.getMpiCall(), CFD.solver.name, self.parStr())
         threads.queue_fun("cfdRun", waitSTDOUT, (cmd, self.caseDir()))
         return None
@@ -284,12 +284,12 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         for o in obs:
             if o.name == sob.name:
                 continue
-            o.ODS_CFD.mesh.meshMinLevel = sob.ODS_CFD.mesh.meshMinLevel
-            o.ODS_CFD.mesh.meshMaxLevel = sob.ODS_CFD.mesh.meshMaxLevel
-            o.ODS_CFD.mesh.nSurfaceLayers = sob.ODS_CFD.mesh.nSurfaceLayers
-            o.ODS_CFD.mesh.makeRefinementRegion = sob.ODS_CFD.mesh.makeRefinementRegion
-            o.ODS_CFD.mesh.refinementMode = sob.ODS_CFD.mesh.refinementMode
-            o.ODS_CFD.mesh.distanceLevels = sob.ODS_CFD.mesh.distanceLevels
+            o.Compute.CFD.mesh.meshMinLevel = sob.Compute.CFD.mesh.meshMinLevel
+            o.Compute.CFD.mesh.meshMaxLevel = sob.Compute.CFD.mesh.meshMaxLevel
+            o.Compute.CFD.mesh.nSurfaceLayers = sob.Compute.CFD.mesh.nSurfaceLayers
+            o.Compute.CFD.mesh.makeRefinementRegion = sob.Compute.CFD.mesh.makeRefinementRegion
+            o.Compute.CFD.mesh.refinementMode = sob.Compute.CFD.mesh.refinementMode
+            o.Compute.CFD.mesh.distanceLevels = sob.Compute.CFD.mesh.distanceLevels
 
         return None
 
@@ -297,9 +297,9 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         obs = bpy.context.selected_objects
         sob = bpy.context.object
         for o in obs:
-            o.ODS_CFD.bc_preset = sob.ODS_CFD.bc_preset
-            o.ODS_CFD.bc_overrides = sob.ODS_CFD.bc_overrides
-            o.ODS_CFD.bc_override_text = sob.ODS_CFD.bc_override_text
+            o.Compute.CFD.bc_preset = sob.Compute.CFD.bc_preset
+            o.Compute.CFD.bc_overrides = sob.Compute.CFD.bc_overrides
+            o.Compute.CFD.bc_override_text = sob.Compute.CFD.bc_override_text
         return None
 
 bpy.utils.register_class(SCENE_OT_cfdOperators)

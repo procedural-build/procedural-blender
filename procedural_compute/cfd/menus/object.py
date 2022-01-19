@@ -11,4 +11,4 @@ def drawBasic(self, context):
     # Skip this menu if the mainMenu is not pointing to CFD
     if context.scene.Compute.mainMenu != "CFD":
         return
-    context.object.ODS_CFD.drawMenu(self.layout)
+    context.object.Compute.CFD.drawMenu(self.layout)

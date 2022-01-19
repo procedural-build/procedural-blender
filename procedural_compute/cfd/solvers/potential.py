@@ -99,7 +99,7 @@ class potentialFoam():
             filepath = 'system/controlDict'
 
             def writeBody(self):
-                t = bpy.context.scene.ODS_CFD.control.getText()
+                t = bpy.context.scene.Compute.CFD.control.getText()
                 self.writeString(t)
                 return
 
@@ -129,7 +129,7 @@ class potentialFoam():
 
             def writeBody(self):
                 sc = bpy.context.scene
-                sname = sc.ODS_CFD.solver.name
+                sname = sc.Compute.CFD.solver.name
                 fname = "%s.%s"%(self.name, sname)
                 if fname in bpy.data.texts:
                     text = bpy.data.texts[fname].as_string()

@@ -53,7 +53,7 @@ def selectedObjectsAndNames():
 def getNumberOfPatchType(patchType):
     N = 0
     for o in bpy.context.selected_objects:
-        if o.ODS_CFD.preset == patchType:
+        if o.Compute.CFD.preset == patchType:
             N += 1
     return N
 
@@ -74,7 +74,7 @@ class emptyFile():
 
     def openFile(self,mode='w'):
         sc = bpy.context.scene
-        fpath = '%s/%s'%(sc.ODS_CFD.system.caseDir, self.filepath)
+        fpath = '%s/%s'%(sc.Compute.CFD.system.caseDir, self.filepath)
         self.f = openFileWrite(fpath, mode)
 
     def closeFile(self):

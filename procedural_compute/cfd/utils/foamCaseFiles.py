@@ -77,7 +77,7 @@ class nonPlanarFanFacesSetSet(foamUtils.emptyFile):
         f.write("faceSet nonPlanarFanFaces new labelToFace (1 1 1)\n")
         f.write("faceSet nonPlanarFanFaces clear\n")
         for o in bpy.context.selected_objects:
-            if o.ODS_CFD.patchType == 'fan':
+            if o.Compute.CFD.patchType == 'fan':
                 globalNorm = o.matrix_world.to_3x3() * o.data.polygons[0].normal
                 patchName = foamUtils.formatObjectName(o.name)
                 f.write("faceSet currentFan new patchToFace " + patchName + "\n")
@@ -93,14 +93,14 @@ class porousZones(foamUtils.genericFoamFile):
         # Get the number of porous zones
         cc = 0
         for obj in bpy.context.selected_objects:
-            if obj.ODS_CFD.porous_isPorous:
+            if obj.Compute.CFD.porous_isPorous:
                 cc += 1
         # Write the number of porous zones header
         f.write("%i\n("%cc)
 
         # Write porousZone information
         for obj in bpy.context.selected_objects:
-            if obj.ODS_CFD.porous_isPorous:
+            if obj.Compute.CFD.porous_isPorous:
                 zoneName = foamUtils.formatObjectName(obj.name)
                 # Get axis orientation
                 xa = obj.data.vertices[0].co.copy()
@@ -112,8 +112,8 @@ class porousZones(foamUtils.genericFoamFile):
                 za = obj.matrix_world.to_3x3()*za
                 za.normalize()
                 # Get coefficients
-                dc = obj.ODS_CFD.porous_Dcoeff
-                fc = obj.ODS_CFD.porous_Fcoeff
+                dc = obj.Compute.CFD.porous_Dcoeff
+                fc = obj.Compute.CFD.porous_Fcoeff
                 f.write("""
     {0}
     {{
@@ -136,7 +136,7 @@ class decomposeParDict(foamUtils.genericFoamFile):
     def writeBody(self):
         sc = bpy.context.scene
         bpy.ops.scene.getnumsubdomains()
-        s = sc.ODS_CFD.system
+        s = sc.Compute.CFD.system
         if s.numSubdomains < 1:
             s.numSubdomains = 1
         self.f.write("""
@@ -171,7 +171,7 @@ class machines(foamUtils.emptyFile):
     filepath = 'system/machines'
     def writeBody(self):
         f = self.f
-        lines = bpy.context.scene.ODS_CFD.system.machines.split(',')
+        lines = bpy.context.scene.Compute.CFD.system.machines.split(',')
         f.write('\n'.join(lines))
 
 class dotFoam(foamUtils.emptyFile):
@@ -184,9 +184,9 @@ class porousCells(foamUtils.emptyFile):
     def writeBody(self):
         f = self.f
         sc = bpy.context.scene
-        if 'porous' in sc.ODS_CFD.solver.name:
+        if 'porous' in sc.Compute.CFD.solver.name:
             kp = bpy.data.objects['cfdMeshKeepPoint']
             for o in bpy.context.selected_objects:
-                if o.ODS_CFD.porous_isPorous:
+                if o.Compute.CFD.porous_isPorous:
                     zoneName = foamUtils.formatObjectName(o.name)
                     f.write("cellSet %s new surfaceToCell \"%s.stl\" 1((%f %f %f)) true true false -1  -100\n"%(zoneName, zoneName, kp.location[0], kp.location[1], kp.location[2]))

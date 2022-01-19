@@ -35,7 +35,7 @@ class blockMeshDict(foamUtils.genericFoamFile):
 
         f.write(");\n")
         f.write("\nblocks\n(\n    hex (0 1 2 3 4 5 6 7) ")
-        ds = sc.ODS_CFD.mesh.blockMeshSize
+        ds = sc.Compute.CFD.mesh.blockMeshSize
         f.write("(%i %i %i)"%(int(round(abs(v[0][0]-v[1][0])/ds)), int(round(abs(v[1][1]-v[2][1])/ds)), int(round(abs(v[4][2]-v[0][2])/ds))))
         f.write(" simpleGrading (1 1 1)\n);\n\n")
         f.write("edges ();\n\n")
@@ -45,7 +45,7 @@ class blockMeshDict(foamUtils.genericFoamFile):
         patchVerts = ['(3 7 6 2)', '(1 5 4 0)', '(0 4 7 3)', '(2 6 5 1)', '(0 3 2 1)', '(4 5 6 7)']
         for i in range(6):
             o = bpy.data.objects[patchNames[i]]
-            if 'symmetry' in o.ODS_CFD.preset:
+            if 'symmetry' in o.Compute.CFD.preset:
                 patchType = 'symmetryPlane'
             else:
                 patchType = 'wall'
@@ -64,7 +64,7 @@ class snappyHexMeshDict(foamUtils.genericFoamFile):
         sc = bpy.context.scene
         obs = bpy.context.selected_objects
         f = self.f
-        m = sc.ODS_CFD.mesh
+        m = sc.Compute.CFD.mesh
 
         # Which of the steps to run
         self.writeString("castellatedMesh %s;\n"%(str.lower(str(m.castellated))))
@@ -82,7 +82,7 @@ class snappyHexMeshDict(foamUtils.genericFoamFile):
         for o in obs:
             obname = foamUtils.formatObjectName(o.name)
             if (o.type == 'MESH'):
-                if (len(o.data.polygons) > 0) and (not obname in specialNames) and o.ODS_CFD.doMesh and (not o.ODS_CFD.porous_isPorous) and (not o.ODS_CFD.mesh.makeRefinementRegion):
+                if (len(o.data.polygons) > 0) and (not obname in specialNames) and o.Compute.CFD.doMesh and (not o.Compute.CFD.porous_isPorous) and (not o.Compute.CFD.mesh.makeRefinementRegion):
                     self.writeString("%s { name %s ; }\n"%(obname,obname), indent=12)
         self.writeString("}\n", indent=8)
         self.writeString("}\n", indent=4)
@@ -91,7 +91,7 @@ class snappyHexMeshDict(foamUtils.genericFoamFile):
         for o in obs:
             obname = foamUtils.formatObjectName(o.name)
             if (o.type == 'MESH'):
-                if (len(o.data.polygons) > 0) and (not obname in specialNames) and o.ODS_CFD.mesh.makeRefinementRegion:
+                if (len(o.data.polygons) > 0) and (not obname in specialNames) and o.Compute.CFD.mesh.makeRefinementRegion:
                     self.writeString("%s.stl\n"%(obname), indent=4)
                     self.writeString("{\n", indent=4)
                     self.writeString("type triSurfaceMesh;\n", indent=8)
@@ -123,9 +123,9 @@ class snappyHexMeshDict(foamUtils.genericFoamFile):
         for o in obs:
             obname = foamUtils.formatObjectName(o.name)
             if (o.type == 'MESH'):
-                if (len(o.data.polygons) > 0) and (not obname in specialNames) and o.ODS_CFD.doMesh and (not o.ODS_CFD.porous_isPorous) and (not o.ODS_CFD.mesh.makeRefinementRegion):
-                    minLevel = o.ODS_CFD.mesh.meshMinLevel
-                    maxLevel = o.ODS_CFD.mesh.meshMaxLevel
+                if (len(o.data.polygons) > 0) and (not obname in specialNames) and o.Compute.CFD.doMesh and (not o.Compute.CFD.porous_isPorous) and (not o.Compute.CFD.mesh.makeRefinementRegion):
+                    minLevel = o.Compute.CFD.mesh.meshMinLevel
+                    maxLevel = o.Compute.CFD.mesh.meshMaxLevel
                     if maxLevel < minLevel:
                         maxLevel = minLevel
                     self.writeString("%s { level (%i %i) ; }\n"%(obname, minLevel, maxLevel ), indent=16)
@@ -135,11 +135,11 @@ class snappyHexMeshDict(foamUtils.genericFoamFile):
         for o in obs:
             obname = foamUtils.formatObjectName(o.name)
             if (o.type == 'MESH'):
-                if (len(o.data.polygons) > 0) and (not obname in specialNames) and o.ODS_CFD.mesh.makeRefinementRegion:
-                    if o.ODS_CFD.mesh.refinementMode == "surface":
+                if (len(o.data.polygons) > 0) and (not obname in specialNames) and o.Compute.CFD.mesh.makeRefinementRegion:
+                    if o.Compute.CFD.mesh.refinementMode == "surface":
                         self.writeString("%s\n"%(obname), indent=8)
                         self.writeString("{\n", indent=8)
-                        self.writeString("level %s;\n"%(o.ODS_CFD.mesh.distanceLevels), indent=12)
+                        self.writeString("level %s;\n"%(o.Compute.CFD.mesh.distanceLevels), indent=12)
                         self.writeString("cellZone %s;\n"%(obname), indent=12)
                         self.writeString("faceZone %s_faces;\n"%(obname), indent=12)
                         self.writeString("}\n", indent=8)
@@ -153,12 +153,12 @@ class snappyHexMeshDict(foamUtils.genericFoamFile):
         for o in obs:
             obname = foamUtils.formatObjectName(o.name)
             if (o.type == 'MESH'):
-                if (len(o.data.polygons) > 0) and (not obname in specialNames) and o.ODS_CFD.mesh.makeRefinementRegion:
-                    if not o.ODS_CFD.mesh.refinementMode == "surface":
+                if (len(o.data.polygons) > 0) and (not obname in specialNames) and o.Compute.CFD.mesh.makeRefinementRegion:
+                    if not o.Compute.CFD.mesh.refinementMode == "surface":
                         self.writeString("%s\n"%(obname), indent=8)
                         self.writeString("{\n", indent=8)
-                        self.writeString("mode %s;\n"%(o.ODS_CFD.mesh.refinementMode), indent=12)
-                        self.writeString("levels %s;\n"%(o.ODS_CFD.mesh.distanceLevels), indent=12)
+                        self.writeString("mode %s;\n"%(o.Compute.CFD.mesh.refinementMode), indent=12)
+                        self.writeString("levels %s;\n"%(o.Compute.CFD.mesh.distanceLevels), indent=12)
                         self.writeString("}\n", indent=8)
         self.writeString("};\n\n", indent=4)
 
@@ -197,9 +197,9 @@ class snappyHexMeshDict(foamUtils.genericFoamFile):
         self.writeString("{",indent=4,endl="\n")
         for o in obs:
             obname = foamUtils.formatObjectName(o.name)
-            if not obname in specialNames and o.type == 'MESH' and o.ODS_CFD.doMesh and (not o.ODS_CFD.porous_isPorous) and (not o.ODS_CFD.mesh.makeRefinementRegion):
-                if o.ODS_CFD.mesh.nSurfaceLayers > 0:
-                    self.writeString(obname + " { nSurfaceLayers " + str(o.ODS_CFD.mesh.nSurfaceLayers) + " ; }\n", indent=8)
+            if not obname in specialNames and o.type == 'MESH' and o.Compute.CFD.doMesh and (not o.Compute.CFD.porous_isPorous) and (not o.Compute.CFD.mesh.makeRefinementRegion):
+                if o.Compute.CFD.mesh.nSurfaceLayers > 0:
+                    self.writeString(obname + " { nSurfaceLayers " + str(o.Compute.CFD.mesh.nSurfaceLayers) + " ; }\n", indent=8)
         self.writeString("}",indent=4,endl=";\n\n")
 
         self.writeString("expansionRatio            "+str(m.expansionRatio),indent=4,endl=";\n\n")

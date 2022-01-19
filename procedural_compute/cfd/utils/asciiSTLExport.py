@@ -14,9 +14,9 @@ from mathutils.geometry import normal
 
 def porousWriteCheck(obj, writePorous, writeNonPorous):
     passedPorousWriteCheck = True
-    if (not writePorous) and (obj.ODS_CFD.porous_isPorous):
+    if (not writePorous) and (obj.Compute.CFD.porous_isPorous):
         passedPorousWriteCheck = False
-    if (not writeNonPorous) and (not obj.ODS_CFD.porous_isPorous):
+    if (not writeNonPorous) and (not obj.Compute.CFD.porous_isPorous):
         passedPorousWriteCheck = False
     return passedPorousWriteCheck
 
@@ -88,7 +88,7 @@ def writeObjectsToFile(f, objects = None, writePorous=True, writeNonPorous=True)
 
 def writeTriSurface(filename='constant/triSurface/cfdGeom.stl', writePorous=True, writeNonPorous=True):
     sc = bpy.context.scene
-    filename = '%s/%s'%(sc.ODS_CFD.system.caseDir, filename)
+    filename = '%s/%s'%(sc.Compute.CFD.system.caseDir, filename)
     print('Starting Ascii STL Export of Selected Objects to: %s...' % bpy.path.abspath(filename))
 
     f = foamUtils.openFileWrite(filename)
