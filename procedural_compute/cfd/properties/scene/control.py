@@ -11,7 +11,7 @@ import bpy
 from procedural_compute.core.utils import make_tuples
 
 
-class BM_SCENE_CFDControl(bpy.types.PropertyGroup):
+class SCENE_PROPS_COMPUTE_CFDControl(bpy.types.PropertyGroup):
 
     items_list = make_tuples(["firstTime", "latestTime", "startTime"])
     startFrom: bpy.props.EnumProperty(name="startFrom", items=items_list, description="startFrom", default="latestTime")
@@ -55,14 +55,14 @@ class BM_SCENE_CFDControl(bpy.types.PropertyGroup):
         split = layout.split()
 
         layout.row().prop(self, "endTime")
-        layout.row().operator("scene.compute_cfdoperators", text="Run Solver").command = "run_solver"
+        layout.row().operator("scene.compute_operators_cfd", text="Run Solver").command = "run_solver"
 
         box = layout.box()
         box.row().label(text="Virtual Wind Tunnel")
         split = box.split()
         split.column().prop(self, "n_angles")
         split.column().prop(self, "iters_n")
-        box.row().operator("scene.compute_cfdoperators", text="Run Wind Tunnel").command = "run_wind_tunnel"
+        box.row().operator("scene.compute_operators_cfd", text="Run Wind Tunnel").command = "run_wind_tunnel"
 
         #layout.row().prop(self, "stopAt", expand=False)
         #row = layout.row()
@@ -154,4 +154,4 @@ class BM_SCENE_CFDControl(bpy.types.PropertyGroup):
         return t
 
 
-bpy.utils.register_class(BM_SCENE_CFDControl)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFDControl)

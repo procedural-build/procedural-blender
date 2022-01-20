@@ -21,12 +21,12 @@ def menu_add_clock(self, context):
 def register():
     bpy.types.VIEW3D_MT_mesh_add.append(menu_add_clock)
     #------------------
-    bpy.types.SCENE_PT_bm.append(drawBasic)
+    bpy.types.SCENE_PT_COMPUTE_CORE.append(drawBasic)
     return
 
 
 def unregister():
     bpy.types.VIEW3D_MT_mesh_add.remove(menu_add_clock)
     #------------------
-    bpy.types.SCENE_PT_bm.remove(drawBasic)
+    bpy.types.SCENE_PT_COMPUTE_CORE.remove(drawBasic)
     return

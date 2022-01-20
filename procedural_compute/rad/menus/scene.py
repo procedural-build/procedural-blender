@@ -13,7 +13,7 @@ import procedural_compute.sun.properties.scene
 from procedural_compute.sun.utils.timeFrameSync import frameToTime
 
 import procedural_compute.rad.properties.scene
-from procedural_compute.core.utils.blendmeUtils import drawCollectionTemplateList
+from procedural_compute.core.utils.collections import drawCollectionTemplateList
 
 
 def drawBasic(self, context):

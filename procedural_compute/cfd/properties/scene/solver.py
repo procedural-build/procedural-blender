@@ -9,11 +9,11 @@
 import bpy
 from procedural_compute.core.utils import make_tuples
 from procedural_compute.cfd.utils.foamUtils import formatObjectName
-from procedural_compute.cfd.properties.scene.turbulence import BM_SCENE_CFDSolver_RAS
-from procedural_compute.cfd.properties.scene.turbulence import BM_SCENE_CFDSolver_LES
+from procedural_compute.cfd.properties.scene.turbulence import SCENE_PROPS_COMPUTE_CFDSolver_RAS
+from procedural_compute.cfd.properties.scene.turbulence import SCENE_PROPS_COMPUTE_CFDSolver_LES
 
 
-class Compute.CFD_FIELD_VECTOR(bpy.types.PropertyGroup):
+class SCENE_PROPS_COMPUTE_CFD_FIELD_VECTOR(bpy.types.PropertyGroup):
 
     value: bpy.props.FloatVectorProperty(name="value", description="Default Value", default=(0, 0, 0))
 
@@ -24,10 +24,10 @@ class Compute.CFD_FIELD_VECTOR(bpy.types.PropertyGroup):
         layout.row().prop(self, "value")
 
 
-bpy.utils.register_class(Compute.CFD_FIELD_VECTOR)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFD_FIELD_VECTOR)
 
 
-class Compute.CFD_FIELD_SCALAR(bpy.types.PropertyGroup):
+class SCENE_PROPS_COMPUTE_CFD_FIELD_SCALAR(bpy.types.PropertyGroup):
 
     value: bpy.props.FloatProperty(name="value", description="Default Value", default=0)
 
@@ -38,12 +38,12 @@ class Compute.CFD_FIELD_SCALAR(bpy.types.PropertyGroup):
         layout.row().prop(self, "value")
 
 
-bpy.utils.register_class(Compute.CFD_FIELD_SCALAR)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFD_FIELD_SCALAR)
 
 
-class Compute.CFD_FIELDS(bpy.types.PropertyGroup):
-    volScalarField: bpy.props.PointerProperty(type=Compute.CFD_FIELD_SCALAR)
-    volVectorField: bpy.props.PointerProperty(type=Compute.CFD_FIELD_VECTOR)
+class SCENE_PROPS_COMPUTE_CFD_FIELDS(bpy.types.PropertyGroup):
+    volScalarField: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFD_FIELD_SCALAR)
+    volVectorField: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFD_FIELD_VECTOR)
     items_list = make_tuples(["volVectorField", "volScalarField"])
     classType: bpy.props.EnumProperty(name="classType", items=items_list, description="classType", default="volScalarField")
     dim: bpy.props.StringProperty(name="dim", default="[0,1,-1,0,0,0,0]")
@@ -61,13 +61,13 @@ class Compute.CFD_FIELDS(bpy.types.PropertyGroup):
         return None
 
 
-bpy.utils.register_class(Compute.CFD_FIELDS)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFD_FIELDS)
 
 
-class BM_SCENE_CFDSolver(bpy.types.PropertyGroup):
+class SCENE_PROPS_COMPUTE_CFDSolver(bpy.types.PropertyGroup):
 
-    RAS: bpy.props.PointerProperty(type=BM_SCENE_CFDSolver_RAS)
-    LES: bpy.props.PointerProperty(type=BM_SCENE_CFDSolver_LES)
+    RAS: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFDSolver_RAS)
+    LES: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFDSolver_LES)
 
     items_list = make_tuples([
         "potentialFoam",
@@ -85,7 +85,7 @@ class BM_SCENE_CFDSolver(bpy.types.PropertyGroup):
 
     nu: bpy.props.FloatProperty(name="nu", step=1, precision=5, description="Kinematic Viscosity (nu)", default=1.5e-5)
 
-    fields: bpy.props.CollectionProperty(type=Compute.CFD_FIELDS, name="fields", description="Fields")
+    fields: bpy.props.CollectionProperty(type=SCENE_PROPS_COMPUTE_CFD_FIELDS, name="fields", description="Fields")
     active_fields_index: bpy.props.IntProperty()
 
     # Define the overrides here (as pointers to Blender text blocks)
@@ -143,4 +143,4 @@ class BM_SCENE_CFDSolver(bpy.types.PropertyGroup):
 
         return json_dict
 
-bpy.utils.register_class(BM_SCENE_CFDSolver)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFDSolver)

@@ -30,25 +30,25 @@ class defaultPatch():
         return None
 
 
-class Compute.CFD_PATCH_VECTOR_slip(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_slip(bpy.types.PropertyGroup, defaultPatch):
     def getText(self):
         fieldList = [("type", "slip")]
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_VECTOR_slip)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_slip)
 
 
-class Compute.CFD_PATCH_VECTOR_zeroGradient(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_zeroGradient(bpy.types.PropertyGroup, defaultPatch):
     def getText(self):
         fieldList = [("type", "zeroGradient")]
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_VECTOR_zeroGradient)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_zeroGradient)
 
 
-class Compute.CFD_PATCH_VECTOR_other(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_other(bpy.types.PropertyGroup, defaultPatch):
 
     value: bpy.props.StringProperty(name="value", default="{type zeroGradient;}")
 
@@ -60,10 +60,10 @@ class Compute.CFD_PATCH_VECTOR_other(bpy.types.PropertyGroup, defaultPatch):
         return self.value
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_VECTOR_other)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_other)
 
 
-class Compute.CFD_PATCH_VECTOR_inletOutlet(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_inletOutlet(bpy.types.PropertyGroup, defaultPatch):
 
     inletValue: bpy.props.FloatVectorProperty(name="Value", default=(0.0, 0.0, 0.0))
     value: bpy.props.FloatVectorProperty(name="Value", default=(0.0, 0.0, 0.0))
@@ -82,10 +82,10 @@ class Compute.CFD_PATCH_VECTOR_inletOutlet(bpy.types.PropertyGroup, defaultPatch
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_VECTOR_inletOutlet)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_inletOutlet)
 
 
-class Compute.CFD_PATCH_VECTOR_fixedValue(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_fixedValue(bpy.types.PropertyGroup, defaultPatch):
     value: bpy.props.FloatVectorProperty(name="Value", default=(0.0, 0.0, 0.0))
 
     def setValue(self, value, var='value'):
@@ -100,15 +100,15 @@ class Compute.CFD_PATCH_VECTOR_fixedValue(bpy.types.PropertyGroup, defaultPatch)
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_VECTOR_fixedValue)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_fixedValue)
 
 
-class Compute.CFD_PATCH_VECTOR(bpy.types.PropertyGroup):
-    slip: bpy.props.PointerProperty(type=Compute.CFD_PATCH_VECTOR_slip)
-    zeroGradient: bpy.props.PointerProperty(type=Compute.CFD_PATCH_VECTOR_zeroGradient)
-    fixedValue: bpy.props.PointerProperty(type=Compute.CFD_PATCH_VECTOR_fixedValue)
-    inletOutlet: bpy.props.PointerProperty(type=Compute.CFD_PATCH_VECTOR_inletOutlet)
-    other: bpy.props.PointerProperty(type=Compute.CFD_PATCH_VECTOR_other)
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR(bpy.types.PropertyGroup):
+    slip: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_slip)
+    zeroGradient: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_zeroGradient)
+    fixedValue: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_fixedValue)
+    inletOutlet: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_inletOutlet)
+    other: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR_other)
 
     items_list = make_tuples([
         "fixedValue",
@@ -141,4 +141,4 @@ class Compute.CFD_PATCH_VECTOR(bpy.types.PropertyGroup):
         return getattr(self, self.patchType).getText()
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_VECTOR)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR)

@@ -20,10 +20,10 @@ from procedural_compute.core.utils.compute.view import GenericViewSet
 
 
 def get_system_properties():
-    system_settings = bpy.context.scene.Compute.system
-    project_id = system_settings.project_id
-    task_id = system_settings.task_id
-    return (project_id, task_id, control_properties, solver_properties, system_settings)
+    _settings = bpy.context.scene.Compute.task
+    project_id = _settings.project_id
+    task_id = _settings.task_id
+    return (project_id, task_id, _settings)
 
 
 class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
@@ -52,17 +52,17 @@ class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
 
     def refresh(self):
         """ """
-        system_settings = bpy.context.scene.Compute.CFD.system
+        _settings = bpy.context.scene.Compute.auth
         logger.info(f"REFRESHING USER TOKEN: {USER[0].token}")
         USER[0].refresh_token()
-        system_settings.access_token = USER[0].token
-        system_settings.expire_time = "%.02f"%(USER[0].token_exp_time)
+        _settings.access_token = USER[0].token
+        _settings.expire_time = "%.02f"%(USER[0].token_exp_time)
 
     def get_or_create_project_and_task(self):
-        system_settings = bpy.context.scene.Compute.CFD.system
-        project_name = system_settings.project_name.strip()
-        project_number = system_settings.project_number
-        task_name = system_settings.task_name.strip()
+        _settings = bpy.context.scene.Compute.task
+        project_name = _settings.project_name.strip()
+        project_number = _settings.project_number
+        task_name = _settings.task_name.strip()
 
         # Get the list of projects
         if not project_number:
@@ -76,10 +76,10 @@ class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
             create=True
         )
         if project:
-            system_settings.project_name = project.get('name')
-            system_settings.project_number = str(project.get('number')) or ""
-            system_settings.project_id = project.get('uid')
-            system_settings.project_data = json.dumps(project)
+            _settings.project_name = project.get('name')
+            _settings.project_number = str(project.get('number')) or ""
+            _settings.project_id = project.get('uid')
+            _settings.project_data = json.dumps(project)
 
         # We won't get here unless the getting of project succeded
         task  = GenericViewSet(f"/api/project/{project['uid']}/task/").get_or_create(
@@ -93,9 +93,9 @@ class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
             create = True
         )
         if task:
-            system_settings.task_name = task.get('name')
-            system_settings.task_id = task.get('uid')
-            system_settings.task_data = json.dumps(task)
+            _settings.task_name = task.get('name')
+            _settings.task_id = task.get('uid')
+            _settings.task_data = json.dumps(task)
 
         return {
             'project': project,

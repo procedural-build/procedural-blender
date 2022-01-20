@@ -10,7 +10,7 @@ import bpy
 from procedural_compute.core.utils import make_tuples
 
 
-class BM_SCENE_CFDSolver_LES(bpy.types.PropertyGroup):
+class SCENE_PROPS_COMPUTE_CFDSolver_LES(bpy.types.PropertyGroup):
 
     items_list = make_tuples(["Smagorinsky", "oneEqEddy", "SpalartAllmaras"])
     model: bpy.props.EnumProperty(name="lesModel", items=items_list, description="LES Turbulence Model", default="oneEqEddy")
@@ -20,11 +20,11 @@ class BM_SCENE_CFDSolver_LES(bpy.types.PropertyGroup):
         return None
 
 
-bpy.utils.register_class(BM_SCENE_CFDSolver_LES)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFDSolver_LES)
 ##############
 
 
-class BM_SCENE_CFDSolver_RAS(bpy.types.PropertyGroup):
+class SCENE_PROPS_COMPUTE_CFDSolver_RAS(bpy.types.PropertyGroup):
 
     items_list = make_tuples(["kEpsilon", "kOmega", "kOmegaSST"])
     model: bpy.props.EnumProperty(name="rasModel", items=items_list, description="RAS Turbulence Model", default="kEpsilon")
@@ -33,4 +33,4 @@ class BM_SCENE_CFDSolver_RAS(bpy.types.PropertyGroup):
         layout.row().prop(self, "model")
 
 
-bpy.utils.register_class(BM_SCENE_CFDSolver_RAS)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFDSolver_RAS)

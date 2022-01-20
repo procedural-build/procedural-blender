@@ -28,7 +28,7 @@ def setLevel(self, context):
         self.distanceLevels = "((1 4))"
 
 
-class BM_OBJ_CFD_MESH(bpy.types.PropertyGroup):
+class OBJECT_PROPS_COMPUTE_CFD_MESH(bpy.types.PropertyGroup):
     meshMinLevel: bpy.props.IntProperty(name="min", min=0, default=0, description="meshMaxLevel", update=setMeshMinMax)
     meshMaxLevel: bpy.props.IntProperty(name="max", min=0, default=0, description="meshMaxLevel", update=setMeshMinMax)
     nSurfaceLayers: bpy.props.IntProperty(name="nSurfaceLayers", min=0, default=0, description="nSurfaceLayers")
@@ -65,4 +65,4 @@ class BM_OBJ_CFD_MESH(bpy.types.PropertyGroup):
         layout.row().operator("scene.cfdoperators", text="Copy to Selected").command = "copyMeshLevels"
 
 
-bpy.utils.register_class(BM_OBJ_CFD_MESH)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_MESH)

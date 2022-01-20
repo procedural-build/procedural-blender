@@ -24,6 +24,19 @@ def printJSON(pyObj):
     logger.info(json_str)
     return json_str
 
+def data_to_dict(data):
+    try:
+        return json.loads(data)
+    except:
+        pass
+
+    try:
+        return data.decode() if type(data) == bytes else data
+    except:
+        pass
+
+    return data
+
 # Store each user in a class with their access token and a method
 # "request" to GET, POST, PUT, DELETE to the API urls
 class User():
@@ -36,6 +49,7 @@ class User():
         self.password   = password
         self._access_token   = ""
         self._refresh_token  = ""
+        self.request_log = []
 
     @property
     def token(self):
@@ -98,7 +112,7 @@ class User():
         # Check if the current access token is valid
         exp_time = self.token_exp_time
         if exp_time and exp_time > time_remaining:
-            logger.info("No refresh required. Token will expire in", exp_time)
+            logger.info(f"No refresh required. Token will expire in {exp_time}")
             return self.token
         # Do the refresh
         response_dict = self.request('POST', '/auth-jwt/refresh/', {'refresh': self._refresh_token})
@@ -133,6 +147,20 @@ class User():
         # Should not get here
         return decoded_response
 
+    def show_log(self, n=1, ids=[], methods=["POST", "PUT", "PATCH"]):
+        methods = set(methods)
+        ids = set(ids)
+
+        def _include(i):
+            return (i.get("method") in methods) and (i.get('id') in ids if ids else True)
+       
+        _requests = [i for i in self.request_log if _include(i)]
+        _requests = _requests[-1*n:] if len(_requests) >= n else _requests
+
+        printJSON(_requests)
+
+        return _requests
+
     def request(self, method, url, data=None, query_params=None, extra_headers={}, raw=False):
         # Check if the access token needs refreshing unless we are calling an auth-jwt endpoint
         if not url.startswith('/auth-jwt/'):
@@ -158,8 +186,19 @@ class User():
         # Get the headers to use
         headers = self.headers(_extra_headers)
 
+        # Log the request data (for debugging later)
+        _id = len(self.request_log) + 1
+        logger.info(f"Sending Request #{_id}: [{method}] {url}")  # {headers} {data}
+        self.request_log.append({
+            "method": method,
+            "headers": headers,
+            "id": _id,
+            "url": url,
+            "time": datetime.now().isoformat(),
+            "data": data_to_dict(data)
+        })
+
         # Get the actual request object
-        logger.info(f"Sending Request: [{method}] {url}: {headers}")  # : {data}
         request = Req.Request(url, method=method, data=data, headers=headers)
 
         try:

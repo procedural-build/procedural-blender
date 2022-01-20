@@ -19,7 +19,7 @@ def recalcsunpath(self, context):
 
 
 # Import properties from submodules
-class SCENE_PT_COMPUTE_CORE_SITE(bpy.types.PropertyGroup):
+class SCENE_PROPS_COMPUTE_CORE_SITE(bpy.types.PropertyGroup):
 
     terrain: bpy.props.EnumProperty(
         name="Terrain",
@@ -53,7 +53,7 @@ class SCENE_PT_COMPUTE_CORE_SITE(bpy.types.PropertyGroup):
         col.prop(self, "terrain", expand=False)
         return
 
-bpy.utils.register_class(SCENE_PT_COMPUTE_CORE_SITE)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CORE_SITE)
 
 ##############
 # Point from Scene to ODS variables

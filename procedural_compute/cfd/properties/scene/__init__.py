@@ -10,22 +10,25 @@
 import bpy
 from procedural_compute.core.utils import make_tuples
 
-from procedural_compute.cfd.properties.scene.mesh import BM_SCENE_CFDMesh
-from procedural_compute.cfd.properties.scene.control import BM_SCENE_CFDControl
-from procedural_compute.cfd.properties.scene.solver import BM_SCENE_CFDSolver
-from procedural_compute.cfd.properties.scene.system import BM_SCENE_CFDSystem
-from procedural_compute.cfd.properties.scene.postproc import BM_SCENE_CFDPostProc
+from .mesh import SCENE_PROPS_COMPUTE_CFDMesh
+from .control import SCENE_PROPS_COMPUTE_CFDControl
+from .solver import SCENE_PROPS_COMPUTE_CFDSolver
+from .system import SCENE_PROPS_COMPUTE_CFDSystem
+from .task import SCENE_PROPS_COMPUTE_CFD_Task
+from .postproc import SCENE_PROPS_COMPUTE_CFDPostProc
 
-class BM_SCENE_CFD(bpy.types.PropertyGroup):
 
-    mesh: bpy.props.PointerProperty(type=BM_SCENE_CFDMesh)
-    control: bpy.props.PointerProperty(type=BM_SCENE_CFDControl)
-    solver: bpy.props.PointerProperty(type=BM_SCENE_CFDSolver)
-    system: bpy.props.PointerProperty(type=BM_SCENE_CFDSystem)
-    postproc: bpy.props.PointerProperty(type=BM_SCENE_CFDPostProc)
+class SCENE_PROPS_COMPUTE_CFD(bpy.types.PropertyGroup):
 
-    items_list = make_tuples(["System", "Solver", "Mesh", "Control", "PostProc"])
-    menu: bpy.props.EnumProperty(name="CFDMenu", items=items_list, description="CFD menu categories", default="System")
+    mesh: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFDMesh)
+    control: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFDControl)
+    solver: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFDSolver)
+    system: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFDSystem)
+    task: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFD_Task)
+    postproc: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFDPostProc)
+
+    items_list = make_tuples(["Task", "Solver", "Mesh", "Control", "PostProc"])
+    menu: bpy.props.EnumProperty(name="CFDMenu", items=items_list, description="CFD menu categories", default="Task")
 
     showCoeffs: bpy.props.BoolProperty(name="showCoeffs", description="Show advanced wall coefficients", default=False)
 
@@ -36,8 +39,4 @@ class BM_SCENE_CFD(bpy.types.PropertyGroup):
         return None
 
 
-bpy.utils.register_class(BM_SCENE_CFD)
-
-##############
-# Point from Scene to ODS variables
-bpy.types.Scene.Compute.CFD = bpy.props.PointerProperty(type=BM_SCENE_CFD)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFD)

@@ -30,16 +30,16 @@ class defaultPatch():
         return None
 
 
-class Compute.CFD_PATCH_SCALAR_zeroGradient(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_zeroGradient(bpy.types.PropertyGroup, defaultPatch):
     def getText(self):
         fieldList = [("type", "zeroGradient")]
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_SCALAR_zeroGradient)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_zeroGradient)
 
 
-class Compute.CFD_PATCH_SCALAR_other(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_other(bpy.types.PropertyGroup, defaultPatch):
 
     value: bpy.props.StringProperty(name="value", default="{type zeroGradient;}")
 
@@ -50,10 +50,10 @@ class Compute.CFD_PATCH_SCALAR_other(bpy.types.PropertyGroup, defaultPatch):
         return "%s\n"%(self.value)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_SCALAR_other)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_other)
 
 
-class Compute.CFD_PATCH_SCALAR_inletOutlet(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_inletOutlet(bpy.types.PropertyGroup, defaultPatch):
 
     inletValue: bpy.props.FloatProperty(name="inletValue", default=0.0)
     value: bpy.props.FloatProperty(name="value", default=0.0)
@@ -68,10 +68,10 @@ class Compute.CFD_PATCH_SCALAR_inletOutlet(bpy.types.PropertyGroup, defaultPatch
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_SCALAR_inletOutlet)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_inletOutlet)
 
 
-class Compute.CFD_PATCH_SCALAR_kqRWallFunction(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_kqRWallFunction(bpy.types.PropertyGroup, defaultPatch):
     value: bpy.props.FloatProperty(name="Value", default=0.0)
 
     def setValue(self, value, var='value'):
@@ -85,10 +85,10 @@ class Compute.CFD_PATCH_SCALAR_kqRWallFunction(bpy.types.PropertyGroup, defaultP
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_SCALAR_kqRWallFunction)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_kqRWallFunction)
 
 
-class Compute.CFD_PATCH_SCALAR_epsilonWallFunction(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_epsilonWallFunction(bpy.types.PropertyGroup, defaultPatch):
     value: bpy.props.FloatProperty(name="Value", default=0.0)
 
     def setValue(self, value, var='value'):
@@ -102,10 +102,10 @@ class Compute.CFD_PATCH_SCALAR_epsilonWallFunction(bpy.types.PropertyGroup, defa
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_SCALAR_epsilonWallFunction)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_epsilonWallFunction)
 
 
-class Compute.CFD_PATCH_SCALAR_omegaWallFunction(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_omegaWallFunction(bpy.types.PropertyGroup, defaultPatch):
     value: bpy.props.FloatProperty(name="Value", default=0.0)
 
     def setValue(self, value, var='value'):
@@ -119,10 +119,10 @@ class Compute.CFD_PATCH_SCALAR_omegaWallFunction(bpy.types.PropertyGroup, defaul
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_SCALAR_omegaWallFunction)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_omegaWallFunction)
 
 
-class Compute.CFD_PATCH_SCALAR_nutkWallFunction(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_nutkWallFunction(bpy.types.PropertyGroup, defaultPatch):
     value: bpy.props.FloatProperty(name="Value", default=0.0)
 
     def setValue(self, value, var='value'):
@@ -136,10 +136,10 @@ class Compute.CFD_PATCH_SCALAR_nutkWallFunction(bpy.types.PropertyGroup, default
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_SCALAR_nutkWallFunction)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_nutkWallFunction)
 
 
-class Compute.CFD_PATCH_SCALAR_fixedValue(bpy.types.PropertyGroup, defaultPatch):
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_fixedValue(bpy.types.PropertyGroup, defaultPatch):
     value: bpy.props.FloatProperty(name="Value", default=0.0)
 
     def setValue(self, value, var='value'):
@@ -153,18 +153,18 @@ class Compute.CFD_PATCH_SCALAR_fixedValue(bpy.types.PropertyGroup, defaultPatch)
         return self.formatFields(fieldList)
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_SCALAR_fixedValue)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_fixedValue)
 
 
-class Compute.CFD_PATCH_SCALAR(bpy.types.PropertyGroup):
-    zeroGradient: bpy.props.PointerProperty(type=Compute.CFD_PATCH_SCALAR_zeroGradient)
-    fixedValue: bpy.props.PointerProperty(type=Compute.CFD_PATCH_SCALAR_fixedValue)
-    kqRWallFunction: bpy.props.PointerProperty(type=Compute.CFD_PATCH_SCALAR_kqRWallFunction)
-    epsilonWallFunction: bpy.props.PointerProperty(type=Compute.CFD_PATCH_SCALAR_epsilonWallFunction)
-    omegaWallFunction: bpy.props.PointerProperty(type=Compute.CFD_PATCH_SCALAR_omegaWallFunction)
-    nutkWallFunction: bpy.props.PointerProperty(type=Compute.CFD_PATCH_SCALAR_nutkWallFunction)
-    inletOutlet: bpy.props.PointerProperty(type=Compute.CFD_PATCH_SCALAR_inletOutlet)
-    other: bpy.props.PointerProperty(type=Compute.CFD_PATCH_SCALAR_other)
+class OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR(bpy.types.PropertyGroup):
+    zeroGradient: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_zeroGradient)
+    fixedValue: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_fixedValue)
+    kqRWallFunction: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_kqRWallFunction)
+    epsilonWallFunction: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_epsilonWallFunction)
+    omegaWallFunction: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_omegaWallFunction)
+    nutkWallFunction: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_nutkWallFunction)
+    inletOutlet: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_inletOutlet)
+    other: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR_other)
 
     items_list = make_tuples([
         "fixedValue",
@@ -191,4 +191,4 @@ class Compute.CFD_PATCH_SCALAR(bpy.types.PropertyGroup):
         return getattr(self, self.patchType).getText()
 
 
-bpy.utils.register_class(Compute.CFD_PATCH_SCALAR)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR)

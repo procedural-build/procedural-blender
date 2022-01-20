@@ -12,7 +12,7 @@ from procedural_compute.core.utils import make_tuples
 from procedural_compute.core.utils.compute.auth import USER
 
 
-class BM_SCENE_CFDPostProc(bpy.types.PropertyGroup):
+class SCENE_PROPS_COMPUTE_CFDPostProc(bpy.types.PropertyGroup):
 
     # Server login and token properties
     task_case_dir: bpy.props.StringProperty(name="Task case_dir", default='foam', description="Task case_dir (on server)")
@@ -40,15 +40,15 @@ class BM_SCENE_CFDPostProc(bpy.types.PropertyGroup):
         row.prop(self, "probe_min_range")
         row.prop(self, "probe_max_range")
         row = box.row()
-        row.operator("scene.compute_cfdoperators", text="Probe Selected", ).command = "probe_selected"
+        row.operator("scene.compute_operators_cfd", text="Probe Selected", ).command = "probe_selected"
         row.prop(self, "auto_load_probes", text="Auto Load")
         # Manually load the probe results
-        row.operator("scene.compute_cfdoperators", text="Load Probes", ).command = "load_selected_probes"
+        row.operator("scene.compute_operators_cfd", text="Load Probes", ).command = "load_selected_probes"
 
         # Only use this if you want to pull down the case
         box = layout.box()
         box.row().prop(sc.Compute.CFD.system, "caseDir")
-        box.row().operator("scene.compute_cfdoperators", text="Pull folder", ).command = "pull_to_local"
+        box.row().operator("scene.compute_operators_cfd", text="Pull folder", ).command = "pull_to_local"
 
         # Open Paraview
         box = layout.box()
@@ -57,4 +57,4 @@ class BM_SCENE_CFDPostProc(bpy.types.PropertyGroup):
         row.enabled = is_not_windows
 
 
-bpy.utils.register_class(BM_SCENE_CFDPostProc)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFDPostProc)

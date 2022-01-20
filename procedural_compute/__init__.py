@@ -8,6 +8,7 @@ logging.basicConfig(
 for name in ('blender_id', 'blender_cloud'):
     logging.getLogger(name).setLevel(logging.DEBUG)
 
+logger = logging.getLogger(__name__)
 
 bl_info = {
     "name": "Procedural Compute Client",
@@ -20,25 +21,29 @@ bl_info = {
 
 
 def register():
+    logger.info(f"Registering Compute modules...")
     from .core import register as register_core
-    #from .cfd import register as register_cfd
+    from .cfd import register as register_cfd
     #from .rad import register as register_rad
     #from .sun import register as register_sun
     register_core()
-    #register_cfd()
+    register_cfd()
     #register_rad()
     #register_sun()
+    logger.info(f"Compute modules registered!")
 
 
 def unregister():
+    logger.info(f"Unregistering Compute modules...")
     from .core import unregister as unregister_core
-    #from .cfd import unregister as unregister_cfd
+    from .cfd import unregister as unregister_cfd
     #from .rad import unregister as unregister_rad
     #from .sun import unregister as unregister_sun
     unregister_core()
-    #unregister_cfd()
+    unregister_cfd()
     #unregister_rad()
     #unregister_sun()
+    logger.info(f"Compute modules unregistered!")
 
 
 if __name__ == "__main__":

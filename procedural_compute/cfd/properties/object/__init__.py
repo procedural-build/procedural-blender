@@ -9,11 +9,11 @@
 
 import bpy
 from procedural_compute.core.utils import make_tuples
-from procedural_compute.core.utils.blendmeUtils import drawCollectionTemplateList
+from procedural_compute.core.utils.collections import drawCollectionTemplateList
 
 import procedural_compute.cfd.solvers
-from procedural_compute.cfd.properties.object.mesh import BM_OBJ_CFD_MESH
-from procedural_compute.cfd.properties.object.patches import BM_OBJ_CFD_PATCHFIELD
+from procedural_compute.cfd.properties.object.mesh import OBJECT_PROPS_COMPUTE_CFD_MESH
+from procedural_compute.cfd.properties.object.patches import OBJECT_PROPS_COMPUTE_CFD_PATCHFIELD
 
 import json
 
@@ -30,9 +30,9 @@ def setFields(self, context):
     return None
 
 
-class BM_OBJ_CFD(bpy.types.PropertyGroup):
+class OBJECT_PROPS_COMPUTE_CFD(bpy.types.PropertyGroup):
 
-    mesh: bpy.props.PointerProperty(type=BM_OBJ_CFD_MESH)
+    mesh: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_MESH)
 
     bc_preset: bpy.props.StringProperty(name="Preset", default='wall', description="BC Preset")
     bc_override_text: bpy.props.PointerProperty(type=bpy.types.Text, name="BC Override text", description="Text that contains the override definition")
@@ -45,7 +45,7 @@ class BM_OBJ_CFD(bpy.types.PropertyGroup):
 
     doMesh: bpy.props.BoolProperty(name="doMesh", default=True, description="Include in Meshing")
 
-    fields: bpy.props.CollectionProperty(type=BM_OBJ_CFD_PATCHFIELD, name="fields", description="Fields")
+    fields: bpy.props.CollectionProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCHFIELD, name="fields", description="Fields")
     active_fields_index: bpy.props.IntProperty()
 
     porous_isPorous: bpy.props.BoolProperty(name="isPorous", default=False, description="Is this object Porous")
@@ -163,7 +163,4 @@ class BM_OBJ_CFD(bpy.types.PropertyGroup):
         }
         return json_dict
 
-bpy.utils.register_class(BM_OBJ_CFD)
-#####################
-
-bpy.types.Object.Compute.CFD = bpy.props.PointerProperty(type=BM_OBJ_CFD)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD)

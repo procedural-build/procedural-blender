@@ -10,17 +10,20 @@
 import bpy
 from procedural_compute.core.utils import make_tuples
 
-from .site import SCENE_PT_COMPUTE_CORE_SITE
-from .auth import SCENE_PT_COMPUTE_CORE_AUTH 
+from .site import SCENE_PROPS_COMPUTE_CORE_SITE
+from .auth import SCENE_PROPS_COMPUTE_CORE_AUTH 
+from .task import SCENE_PROPS_COMPUTE_CORE_TASK
+
+from procedural_compute.cfd.properties.scene import SCENE_PROPS_COMPUTE_CFD
 
 
-##############
+class SCENE_PROPS_COMPUTE_CORE(bpy.types.PropertyGroup):
 
+    auth: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CORE_AUTH)
+    site: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CORE_SITE)
+    task: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CORE_TASK)
 
-class SCENE_PT_COMPUTE_CORE(bpy.types.PropertyGroup):
-
-    auth: bpy.props.PointerProperty(type=SCENE_PT_COMPUTE_CORE_AUTH)
-    site: bpy.props.PointerProperty(type=SCENE_PT_COMPUTE_CORE_SITE)
+    CFD: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFD)
 
     mainMenu: bpy.props.EnumProperty(
         name="mainMenu",
@@ -29,8 +32,8 @@ class SCENE_PT_COMPUTE_CORE(bpy.types.PropertyGroup):
     )
 
 
-bpy.utils.register_class(SCENE_PT_COMPUTE_CORE)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CORE)
 
 ##############
 # Point from Scene to ODS variables
-bpy.types.Scene.Compute = bpy.props.PointerProperty(type=SCENE_PT_COMPUTE_CORE)
+bpy.types.Scene.Compute = bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CORE)

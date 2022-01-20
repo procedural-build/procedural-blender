@@ -8,14 +8,14 @@
 
 import bpy
 from procedural_compute.core.utils import make_tuples
-from procedural_compute.cfd.properties.object.patches.scalar import Compute.CFD_PATCH_SCALAR
-from procedural_compute.cfd.properties.object.patches.vector import Compute.CFD_PATCH_VECTOR
+from procedural_compute.cfd.properties.object.patches.scalar import OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR
+from procedural_compute.cfd.properties.object.patches.vector import OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR
 
 
-class BM_OBJ_CFD_PATCHFIELD(bpy.types.PropertyGroup):
+class OBJECT_PROPS_COMPUTE_CFD_PATCHFIELD(bpy.types.PropertyGroup):
 
-    volScalarField: bpy.props.PointerProperty(type=Compute.CFD_PATCH_SCALAR)
-    volVectorField: bpy.props.PointerProperty(type=Compute.CFD_PATCH_VECTOR)
+    volScalarField: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_SCALAR)
+    volVectorField: bpy.props.PointerProperty(type=OBJECT_PROPS_COMPUTE_CFD_PATCH_VECTOR)
 
     items_list = make_tuples(["volVectorField", "volScalarField"])
     classType: bpy.props.EnumProperty(name="classType", items=items_list, description="classType", default="volScalarField")
@@ -41,4 +41,4 @@ class BM_OBJ_CFD_PATCHFIELD(bpy.types.PropertyGroup):
         return None
 
 
-bpy.utils.register_class(BM_OBJ_CFD_PATCHFIELD)
+bpy.utils.register_class(OBJECT_PROPS_COMPUTE_CFD_PATCHFIELD)

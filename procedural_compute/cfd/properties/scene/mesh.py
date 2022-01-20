@@ -11,7 +11,7 @@ from procedural_compute.cfd.utils import foamCaseFiles, asciiSTLExport, mesh, fo
 import bpy
 
 
-class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
+class SCENE_PROPS_COMPUTE_CFDMesh(bpy.types.PropertyGroup):
     basic: bpy.props.BoolProperty(name="basicMesh", description="Basic Mesh", default=True)
     castellated: bpy.props.BoolProperty(name="Castellated Mesh", description="Castellated Mesh", default=True)
     snap: bpy.props.BoolProperty(name="Snap Mesh", description="Snap Mesh", default=True)
@@ -92,22 +92,22 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
         box_layout.row().prop(self, "addLayers")
 
         # Operators
-        layout.row().operator("scene.compute_cfdoperators", text="Upload Geometry").command = "upload_geometry"
-        layout.row().operator("scene.compute_cfdoperators", text="Write Mesh Files").command = "write_mesh_files"
-        layout.row().operator("scene.compute_cfdoperators", text="Write Solver Files").command = "write_solver_files"
+        layout.row().operator("scene.compute_operators_cfd", text="Upload Geometry").command = "upload_geometry"
+        layout.row().operator("scene.compute_operators_cfd", text="Write Mesh Files").command = "write_mesh_files"
+        layout.row().operator("scene.compute_operators_cfd", text="Write Solver Files").command = "write_solver_files"
 
-        layout.row().operator("scene.compute_cfdoperators", text="Run Mesh Pipeline").command = "run_mesh_pipeline"
+        layout.row().operator("scene.compute_operators_cfd", text="Run Mesh Pipeline").command = "run_mesh_pipeline"
 
         box_layout = layout.box()
         box_layout.row().label(text="Clean/delete methods (use with caution):")
-        box_layout.row().operator("scene.compute_cfdoperators", text="Clean Processor Dirs").command = "clean_processor_dirs"
-        box_layout.row().operator("scene.compute_cfdoperators", text="Clean Mesh Files").command = "clean_mesh_files"
+        box_layout.row().operator("scene.compute_operators_cfd", text="Clean Processor Dirs").command = "clean_processor_dirs"
+        box_layout.row().operator("scene.compute_operators_cfd", text="Clean Mesh Files").command = "clean_mesh_files"
 
 
         '''
         if self.basic:
             row = layout.row()
-            row.operator("scene.compute_cfdoperators", text="Run Mesh Pipeline").command = "run_mesh_pipeline"
+            row.operator("scene.compute_operators_cfd", text="Run Mesh Pipeline").command = "run_mesh_pipeline"
             row.prop(self, "basic", text="Basic Mesh")
         else:
             row = layout.row()
@@ -294,4 +294,4 @@ class BM_SCENE_CFDMesh(bpy.types.PropertyGroup):
 
         return json_dict
 
-bpy.utils.register_class(BM_SCENE_CFDMesh)
+bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFDMesh)

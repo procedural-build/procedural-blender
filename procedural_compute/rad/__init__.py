@@ -20,8 +20,8 @@ import procedural_compute.rad.operators as operators
 
 
 def register():
-    bpy.types.SCENE_PT_bm.append(drawSceneMenu)
-    bpy.types.OBJECT_PT_bm.append(drawObjectMenu)
+    bpy.types.SCENE_PT_COMPUTE_CORE.append(drawSceneMenu)
+    bpy.types.OBJECT_PT_COMPUTE.append(drawObjectMenu)
     bpy.types.MATERIAL_PT_bm.append(drawMaterialMenu)
     return
 
@@ -30,7 +30,7 @@ def unregister():
     bpy.utils.unregister_class(menus.falsecolour.falsecolorPanel)
     bpy.utils.unregister_class(menus.threshold.thresholdPanel)
 
-    bpy.types.SCENE_PT_bm.remove(drawSceneMenu)
-    bpy.types.OBJECT_PT_bm.remove(drawObjectMenu)
+    bpy.types.SCENE_PT_COMPUTE_CORE.remove(drawSceneMenu)
+    bpy.types.OBJECT_PT_COMPUTE.remove(drawObjectMenu)
     bpy.types.MATERIAL_PT_bm.remove(drawMaterialMenu)
     return

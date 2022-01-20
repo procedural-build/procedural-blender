@@ -8,7 +8,7 @@
 
 import bpy
 
-from procedural_compute.core.utils.blendmeUtils import drawCollectionTemplateList
+from procedural_compute.core.utils.collections import drawCollectionTemplateList
 from procedural_compute.core.utils import make_tuples
 
 

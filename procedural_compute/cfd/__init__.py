@@ -24,14 +24,14 @@ def menu_add_cfdbb(self, context):
 def register():
     bpy.types.VIEW3D_MT_mesh_add.append(menu_add_cfdbb)
     #-----------------
-    bpy.types.SCENE_PT_bm.append(drawSceneMenu)
-    bpy.types.OBJECT_PT_bm.append(drawObjectMenu)
+    bpy.types.SCENE_PT_COMPUTE.append(drawSceneMenu)
+    bpy.types.OBJECT_PT_COMPUTE.append(drawObjectMenu)
     return
 
 
 def unregister():
     bpy.types.VIEW3D_MT_mesh_add.remove(menu_add_cfdbb)
     #-----------------
-    bpy.types.SCENE_PT_bm.remove(drawSceneMenu)
-    bpy.types.OBJECT_PT_bm.remove(drawObjectMenu)
+    bpy.types.SCENE_PT_COMPUTE.remove(drawSceneMenu)
+    bpy.types.OBJECT_PT_COMPUTE.remove(drawObjectMenu)
     return
