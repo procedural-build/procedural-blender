@@ -12,8 +12,19 @@ if [ ! -z "$USERADDONPATH" ]; then
     LINKFOLDER=$USERADDONPATH
 fi
 
+# If the base folder we are linking to doesn't exist then offer to make it
+if [ -d "$LINKFOLDER" ]; then
+    read -p "Folder does not exist.  Would you like to create it? (y/n) [y] " MAKEBASEPATH
+    MAKEBASEPATH=${MAKEBASEPATH:-y}
+    if [ "$MAKEBASEPATH" == "y" ]; then
+        mkdir -p -v $MAKEBASEPATH
+    fi
+fi
+
+# Here this is the actual folder we will link
 LINKFOLDER=$LINKFOLDER/procedural_compute
 
+# If the target link exists then offer to delete it and re-link
 if [ -d "$LINKFOLDER" ]; then
     read -p "Directory already exists at path. Delete and re-link? (y/n) [y] " RELINK
     RELINK=${RELINK:-y}
