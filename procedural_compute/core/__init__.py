@@ -32,6 +32,8 @@ def register():
     bpy.utils.register_class(menus.scene.SCENE_PT_COMPUTE)
     bpy.utils.register_class(menus.object.OBJECT_PT_COMPUTE)
     bpy.utils.register_class(menus.material.MATERIAL_PT_COMPUTE)
+
+    bpy.utils.register_class(menus.popup.ConfirmDialogue)
     return
 
 
@@ -41,4 +43,6 @@ def unregister():
     bpy.utils.unregister_class(menus.scene.SCENE_PT_COMPUTE)
     bpy.utils.unregister_class(menus.object.OBJECT_PT_COMPUTE)
     bpy.utils.unregister_class(menus.material.MATERIAL_PT_COMPUTE)
+
+    bpy.utils.unregister_class(menus.popup.ConfirmDialogue)
     return

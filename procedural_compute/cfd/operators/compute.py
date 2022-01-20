@@ -17,7 +17,7 @@ import re
 import time
 
 from procedural_compute.cfd.utils import foamCaseFiles, asciiSTLExport, mesh, foamUtils
-from procedural_compute.core.utils import subprocesses, fileUtils, threads
+from procedural_compute.core.utils import subprocesses, fileUtils, threads, to_json
 from procedural_compute.core.utils.subprocesses import waitSTDOUT
 from procedural_compute.core.utils.secrets import secure_login
 import procedural_compute.cfd.solvers
@@ -50,9 +50,10 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
     def execute(self, context):
         if hasattr(self, self.command):
             c = getattr(self, self.command)
+            logger.info(f"\n\n###### EXECUTING CFD OPERATION: {self.command} ######\n")
             c()
         else:
-            print(self.command + ": Attribute not found!")
+            logger.info(f"{self.command}: Attribute not found!")
         return{'FINISHED'}
 
     def invoke(self, context, event):
@@ -119,7 +120,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         geometry = io.StringIO()
         asciiSTLExport.writeObjectsToFile(geometry, objects=geometry_objects)
         geometry.seek(0)
-        print("Cast geometry to STL format")
+        logger.info("Cast geometry to STL format")
 
         response = GenericViewSet(
             f'/api/task/{task_id}/file/foam/constant/triSurface/cfdGeom.stl/'
@@ -143,15 +144,15 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
     def upload_separate_surfaces(self):
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
-        print("Writing refinement regions")
+        logger.info("Writing refinement regions")
         separate_objects = [obj for obj in bpy.context.visible_objects if self._separate_stl(obj)]
         for obj in separate_objects:
             name = foamUtils.formatObjectName(obj.name)
-            print(f" - Writing separate stl region: {name}")
+            logger.info(f" - Writing separate stl region: {name}")
             geometry = io.StringIO()
             asciiSTLExport.writeObjectsToFile(geometry, objects = [obj])
             geometry.seek(0)
-            print(" -- Cast refinement regions and cell sets to STL format")
+            logger.info(" -- Cast refinement regions and cell sets to STL format")
             response = GenericViewSet(
                 f'/api/task/{task_id}/file/foam/constant/triSurface/{name}.stl/'
             ).update(
@@ -172,7 +173,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             name = foamUtils.formatObjectName(obj.name)
             setset_str += f'cellSet {name} new surfaceToCell "constant/triSurface/{name}.stl" ((0 0 0)) true true false 0 0\n'
 
-            print(f" - Writing separate setSet file:\n\n {setset_str}")
+            logger.info(f" - Writing separate setSet file:\n\n {setset_str}")
             response = GenericViewSet(
                 f'/api/task/{task_id}/file/foam/cellSets.setSet/'
             ).update(
@@ -438,14 +439,14 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         for _file in files:
             processors = re.findall(f'{path_prefix}/processor[0-9]*/', _file.get("file"))
             processor_paths = processor_paths.union(set(processors))
-        print(f"Got processor folder paths: {processor_paths}")
+        logger.info(f"Got processor folder paths: {processor_paths}")
 
         # Delete each of the paths
         for path in processor_paths:
             response = GenericViewSet(
                 f'/api/task/{task_id}/file/'
             ).delete(path)
-            print(f"Deleted processor path: {path}")
+            logger.info(f"Deleted processor path: {path}")
             time.sleep(0.05)     # Sleep for a bit to avoid throttling
 
     def clean_mesh_files(self, path_prefix="foam/constant"):
@@ -472,14 +473,14 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
                 mesh_files.remove(_path)
                 mesh_files = mesh_files.union(set(folder_path))
 
-        print(f"Got mesh file and folder paths: {mesh_files}")
+        logger.info(f"Got mesh file and folder paths: {mesh_files}")
 
         # Delete each of the paths
         for path in mesh_files:
             response = GenericViewSet(
                 f'/api/task/{task_id}/file/'
             ).delete(path)
-            print(f"Deleted mesh file path: {path}")
+            logger.info(f"Deleted mesh file path: {path}")
             time.sleep(0.05)     # Sleep for a bit to avoid throttling
 
     def probe_selected(self):
@@ -539,12 +540,56 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         def handle_probe_data(data):
             lines = data.splitlines()
-            print(f"GOT DATA FOR {file_url}. Lines: {len(lines)}.  Applying to object: {first_object.name}")
+            logger.info(f"GOT DATA FOR {file_url}. Lines: {len(lines)}.  Applying to object: {first_object.name}")
             color_object(first_object, lines, scale=[postproc_properties.probe_min_range, postproc_properties.probe_max_range])
 
-        print(f"Waiting for file from url: {file_url}")
+        logger.info(f"Waiting for file from url: {file_url}")
         fetch_async(file_url, callback=handle_probe_data, timeout=30, query_params={'download': 'true'})
 
+    def clean_task(self):
+        (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
+
+        # Get the file list
+        files = GenericViewSet(
+            f'/api/task/{task_id}/file/'
+        ).list()
+
+        # Get the root folders
+        root_paths = set([f.get('file').split('/')[0] for f in files if "/" in f.get('file', "")])
+        root_paths = root_paths.difference(['logs'])
+
+        logger.info(f"Got mesh file and folder paths: {root_paths}")
+        to_json(list(root_paths), log=True)
+
+        # Get the list of sub-tasks to the main task 
+        tasks  = GenericViewSet(
+            f"/api/project/{project_id}/task/"
+        ).list(
+            query_params = {
+                "parent__pk": task_id
+            }
+        )
+        logger.info(f"Got {len(tasks)} sub-tasks for project {project_id}, task {task_id} to delete")
+        to_json([i.get('uid') for i in tasks], log=True)
+        #to_json(tasks, log=True)
+
+
+        # Delete each of the paths
+        for path in root_paths:
+            response = GenericViewSet(
+                f"/api/task/{task_id}/file/"
+            ).delete(path)
+            logger.info(f"Deleting root path: {path}")
+            time.sleep(0.2)     # Sleep for a bit to avoid throttling
+
+        # Delete the tasks
+        for task in tasks:
+            _id = task.get("uid") 
+            response = GenericViewSet(
+                f"/api/task/"
+            ).delete(_id)
+            logger.info(f"Deleting task: {_id}")
+            time.sleep(0.2)     # Sleep for a bit to avoid throttling
 
 
 bpy.utils.register_class(SCENE_OT_cfdOperators)

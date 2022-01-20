@@ -112,7 +112,7 @@ class User():
         # Check if the current access token is valid
         exp_time = self.token_exp_time
         if exp_time and exp_time > time_remaining:
-            logger.info(f"No refresh required. Token will expire in {exp_time}")
+            #logger.info(f"No refresh required. Token will expire in {exp_time}")
             return self.token
         # Do the refresh
         response_dict = self.request('POST', '/auth-jwt/refresh/', {'refresh': self._refresh_token})

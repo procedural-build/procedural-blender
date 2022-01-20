@@ -9,3 +9,4 @@
 from .material import *
 from .scene import *
 from .object import *
+from .popup import *
