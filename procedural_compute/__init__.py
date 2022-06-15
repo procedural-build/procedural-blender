@@ -24,10 +24,12 @@ def register():
     logger.info(f"Registering Compute modules...")
     from .core import register as register_core
     from .cfd import register as register_cfd
+    from .energy import register as register_energy
     #from .rad import register as register_rad
     #from .sun import register as register_sun
     register_core()
     register_cfd()
+    register_energy()
     #register_rad()
     #register_sun()
     logger.info(f"Compute modules registered!")
@@ -37,10 +39,12 @@ def unregister():
     logger.info(f"Unregistering Compute modules...")
     from .core import unregister as unregister_core
     from .cfd import unregister as unregister_cfd
+    from .energy import unregister as unregister_energy
     #from .rad import unregister as unregister_rad
     #from .sun import unregister as unregister_sun
-    unregister_core()
+    unregister_energy()
     unregister_cfd()
+    unregister_core()
     #unregister_rad()
     #unregister_sun()
     logger.info(f"Compute modules unregistered!")

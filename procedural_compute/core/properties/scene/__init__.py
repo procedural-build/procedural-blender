@@ -11,10 +11,11 @@ import bpy
 from procedural_compute.core.utils import make_tuples
 
 from .site import SCENE_PROPS_COMPUTE_CORE_SITE
-from .auth import SCENE_PROPS_COMPUTE_CORE_AUTH 
+from .auth import SCENE_PROPS_COMPUTE_CORE_AUTH
 from .task import SCENE_PROPS_COMPUTE_CORE_TASK
 
 from procedural_compute.cfd.properties.scene import SCENE_PROPS_COMPUTE_CFD
+from procedural_compute.energy.properties.scene import SCENE_PROPS_COMPUTE_ENERGY
 
 
 class SCENE_PROPS_COMPUTE_CORE(bpy.types.PropertyGroup):
@@ -24,6 +25,7 @@ class SCENE_PROPS_COMPUTE_CORE(bpy.types.PropertyGroup):
     task: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CORE_TASK)
 
     CFD: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_CFD)
+    Energy: bpy.props.PointerProperty(type=SCENE_PROPS_COMPUTE_ENERGY)
 
     mainMenu: bpy.props.EnumProperty(
         name="mainMenu",
