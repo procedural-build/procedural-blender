@@ -10,7 +10,6 @@
 import bpy
 from procedural_compute.core.utils import make_tuples
 
-
 class SCENE_PROPS_COMPUTE_ENERGY(bpy.types.PropertyGroup):
 
     def drawMenu(self, layout):
@@ -19,8 +18,7 @@ class SCENE_PROPS_COMPUTE_ENERGY(bpy.types.PropertyGroup):
         #c.drawMenu(layout)
 
         L = layout.box()
-
-        L.row().operator("scene.energyoperators", text="Fill floors and separate").command = "fill_floors_and_separate"
+        L.row().operator("scene.energyoperators", text="Model operator")
 
         return None
 

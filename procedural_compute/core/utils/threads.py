@@ -17,6 +17,8 @@ DATA:
 import threading
 import queue
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 queues = {}
 
@@ -24,6 +26,7 @@ queues = {}
 def get_or_create_queue(name, length=4):
     if not name in queues:
         queues[name] = queue.Queue(length)
+        logger.info(f"Created new queue: {name}")
     return queues[name]
 
 
@@ -39,8 +42,10 @@ def put_item(_queue, item, args, **kwargs):
 
 
 def queue_fun(queue_name, _function, args=(), kwargs={}):
+    logger.info(f"Adding function to: {queue_name} [{_function}]")
     _queue = get_or_create_queue(queue_name)
-    put_thread = threading.Thread(target=put_item, args=(_queue, _function, args), kwargs=kwargs)
+    put_thread = threading.Thread(target=put_item, args=(
+        _queue, _function, args), kwargs=kwargs)
     put_thread.daemon = True
     put_thread.start()
     return None

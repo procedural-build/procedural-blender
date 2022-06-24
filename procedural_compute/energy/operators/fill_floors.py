@@ -33,7 +33,7 @@ def get_object_axes(obj):
             continue
     return None
 
-def make_fill_object(obj, edges, left_list, octree):
+def polygon_vertices_edges(obj, edges, left_list, octree):
     logger.info(f"Making fill object from object: {obj.name} with {len(edges)} out of {len(obj.data.edges)} edges")
 
     # Get the list of vertices started
@@ -55,22 +55,8 @@ def make_fill_object(obj, edges, left_list, octree):
         "edges": eList
     }
 
-def make_object(obj_name, vertices=[], edges=[]):
-    logger.info(f"Creating fill object from {obj_name} with {len(edges)} edges and {len(vertices)} vertices")
-    mesh = bpy.data.meshes.new(obj_name)
-    mesh.from_pydata(vertices, edges, [])
-    new_obj = bpy.data.objects.new(obj_name, mesh)
-    bpy.context.scene.collection.objects.link(new_obj)
-    bpy.context.view_layer.objects.active = new_obj
 
-    new_obj.select_set(True)
-
-    # Fill the resultant polygon
-    bpy.ops.object.mode_set(mode = 'EDIT')
-    bpy.ops.mesh.edge_face_add()
-    bpy.ops.object.mode_set(mode = 'OBJECT')
-
-def fill_and_separate(obj):
+def edge_loop_polygons(obj):
     logger.info(f"Running fill and separate on object: {obj.name}")
     # Build the octree that will be used for searching
     octree = Octree(edges=True)
@@ -124,7 +110,7 @@ def fill_and_separate(obj):
 
     # Create the filled objects
     logger.info(f'Making filled objects in {nLoops} loops from object {obj.name}...')
-    return [make_fill_object(obj, loop[0], loop[1], octree) for loop in loopList]
+    return [polygon_vertices_edges(obj, loop[0], loop[1], octree) for loop in loopList]
 
 
 def min_connected_edge(obj, edgeIndex, octree, xy_axes, left=True):

@@ -2,6 +2,7 @@ import asyncio
 import time
 import bpy
 import random
+import logging
 from procedural_compute.core.utils.addRemoveMeshObject import addCubeObject
 from procedural_compute.core.utils.threads import queues, get_or_create_queue, queue_fun
 from procedural_compute.core.utils.compute.auth import get_current_user
@@ -20,19 +21,23 @@ from procedural_compute.core.operators import fetch_async
 fetch_async("http://blender.org")
 """
 
+logger = logging.getLogger("asyncio")
+logger.setLevel(logging.INFO)
+
+
 RESPONSE_CACHE = {}
 
 timer = None
 
 
 def clear_mesh(mesh):
-    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.mesh.delete(type='VERT')
-    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.mode_set(mode='OBJECT')
 
 
-def add_face(size=0.1, center=(0,0,0), rotation=(0,0,0)):
+def add_face(size=0.1, center=(0, 0, 0), rotation=(0, 0, 0)):
     bpy.ops.mesh.primitive_plane_add(
         size=size,
         enter_editmode=False,
@@ -42,24 +47,25 @@ def add_face(size=0.1, center=(0,0,0), rotation=(0,0,0)):
     )
 
 
-def add_grid(min=(0,0,0), max=(1,1,0), n_divs=10):
-    bpy.ops.object.mode_set(mode = 'EDIT')
+def add_grid(min=(0, 0, 0), max=(1, 1, 0), n_divs=10):
+    bpy.ops.object.mode_set(mode='EDIT')
     dx = (max[0] - min[0]) / n_divs
     dy = (max[1] - min[1]) / n_divs
     for x in range(n_divs):
         for y in range(n_divs):
             add_face(size=dx, center=(dx*x, dy*y, 0))
-    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.mode_set(mode='OBJECT')
 
 
 def handle_data(data):
     """ A synchronous function that handles the response data.  This is called
     by the callback from async fetch_page
     """
-    print("Handling the response data", data)
+    logger.info(f"Handling the response data: {data}")
     time.sleep(2)
     #addCubeObject(f"test_cube", 1, [0, 1, 0.5])
-    bpy.ops.mesh.primitive_plane_add(size=2, enter_editmode=False, align='WORLD', location=(0, 0, 0))
+    bpy.ops.mesh.primitive_plane_add(
+        size=2, enter_editmode=False, align='WORLD', location=(0, 0, 0))
     bpy.ops.object.editmode_toggle()
     bpy.ops.mesh.subdivide(number_cuts=4)
     bpy.ops.object.editmode_toggle()
@@ -80,18 +86,58 @@ def handle_data(data):
 
         bpy.ops.object.mode_set(mode='VERTEX_PAINT')
 
-    print("Done handling response data")
+    logger.info("Done handling response data")
+
+
+def test_async(*args, **kwargs):
+    asyncio.ensure_future(
+        test_fetch(*args, **kwargs)
+    )
+    bpy.ops.asyncio.loop(command="START")
+
+
+def dummy_request(url, *args, **kwargs):
+    wait_time = random.randint(1, 10)
+    logger.info(f"The dummy request is sleeping {wait_time} seconds")
+    time.sleep(wait_time)
+    RESPONSE_CACHE[url] = wait_time
+    return wait_time
+
+
+async def test_fetch(url="test", callback=None, timeout=20, clear_cache_after=True, **kwargs):
+    logger.info(
+        f"Running test_fetch function that simulates a delay for fetch to {url} and then executes callback: {callback.__name__}")
+    RESPONSE_CACHE[url] = None
+    queue_fun('test', dummy_request, args=(url,), kwargs={})
+    for i in range(timeout):
+        #logger.info(f"Awaiting for response data from thread: {i}")
+        await asyncio.sleep(1)
+        response_data = RESPONSE_CACHE[url]
+        if response_data is not None:
+            break
+    # warn if no data received
+    if response_data is None:
+        logger.warn(f"No data recieved after {timeout} seconds [url={url}]")
+        return None
+    # Call the callback that handles the response data
+    if callback:
+        callback(response_data)
+    # Clear the cache after handling the response
+    if clear_cache_after:
+        del RESPONSE_CACHE[url]
+
 
 def fetch_async(*args, **kwargs):
     asyncio.ensure_future(
         fetch_data(*args, **kwargs)
     )
-    bpy.ops.asyncio.loop()
+    bpy.ops.asyncio.loop(command="START")
+
 
 def fetch_sync(*args, **kwargs):
     # Simulate some time to fetch the data
     User = get_current_user()
-    print("FETCHING DATA", args, kwargs)
+    logger.info(f"FETCHING DATA: args={args}, kwargs={kwargs}")
     # Fetch the url as requested
     response = User.request(*args, **kwargs)
     # Set the RESPONSE_CACHE
@@ -100,11 +146,12 @@ def fetch_sync(*args, **kwargs):
         response_data = response
     else:
         response_data = getattr(response, 'read_content', None)
-    #print("GOT RESPONSE FROM fetch_sync", response_data)
+    #logger.info("GOT RESPONSE FROM fetch_sync", response_data)
     url = args[1]
     RESPONSE_CACHE[url] = response_data
 
-async def fetch_data(url, method='GET', callback=None, timeout=20, clear_cache_after=False, **kwargs):
+
+async def fetch_data(url, method='GET', callback=None, timeout=20, clear_cache_after=False, callback_kwargs={}, **kwargs):
     ''' Queue a task on another thread to get the data with urllib then
     await until the data is available and call the callback to handle the
     response data. The callback will render objects, meshes, etc) as required
@@ -122,19 +169,25 @@ async def fetch_data(url, method='GET', callback=None, timeout=20, clear_cache_a
     # Now loop for timeout seconds waiting for data
     response_data = None
     for i in range(timeout):
-        print("Awaiting for response data from thread", i)
+        #logger.info(f"Awaiting for response data from thread: {i}")
         await asyncio.sleep(1)
         response_data = RESPONSE_CACHE[url]
         if response_data is not None:
             break
+    # warn if no data received
+    if response_data is None:
+        logger.warn(f"No data recieved after {timeout} seconds [url={url}]")
+        return None
     # Call the callback that handles the response data
-    callback(response_data)
+    if callback:
+        callback(url, response_data, **callback_kwargs)
     # Clear the cache after handling the response
     if clear_cache_after:
         del RESPONSE_CACHE[url]
 
 #task = asyncio.ensure_future(fetch_page("http://blender.org"))
 #asyncio.get_event_loop().run_until_complete(task)
+
 
 class AsyncLoop(bpy.types.Operator):
     bl_idname = "asyncio.loop"
@@ -185,5 +238,6 @@ class AsyncLoop(bpy.types.Operator):
             loop.stop()
             loop.run_forever()
             return {'RUNNING_MODAL'}
+
 
 bpy.utils.register_class(AsyncLoop)

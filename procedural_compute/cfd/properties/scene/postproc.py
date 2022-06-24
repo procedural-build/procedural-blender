@@ -15,7 +15,7 @@ from procedural_compute.core.utils.compute.auth import USER
 class SCENE_PROPS_COMPUTE_CFDPostProc(bpy.types.PropertyGroup):
 
     # Server login and token properties
-    task_case_dir: bpy.props.StringProperty(name="Task case_dir", default='foam', description="Task case_dir (on server)")
+    task_case_dir: bpy.props.StringProperty(name="Task case_dir", default='VWT', description="Task case_dir (on server)")
     auto_load_probes: bpy.props.BoolProperty(default=True)
     probe_time_dir: bpy.props.StringProperty(name="Probe time dir", default='0.0', description="The time folder to load probe results")
     probe_fields: bpy.props.StringProperty(name="Probe fields", default='Utrans,p', description="Probe these fields")
@@ -35,15 +35,26 @@ class SCENE_PROPS_COMPUTE_CFDPostProc(bpy.types.PropertyGroup):
         row.prop(self, "probe_time_dir")
         row = box.row()
         row.prop(self, "probe_fields")
+        row.prop(self, "auto_load_probes", text="Auto Load")
+        box.row().operator("scene.compute_operators_cfd", text="Probe Selected", ).command = "probe_selected"
+
+        # Loading of the probe results
+        box = layout.box()
+        row = box.row()
+        row.prop(self, "task_case_dir")
+        row.prop(self, "probe_time_dir")
+        row = box.row()
         row.prop(self, "load_probe_field")
         row = box.row()
         row.prop(self, "probe_min_range")
         row.prop(self, "probe_max_range")
-        row = box.row()
-        row.operator("scene.compute_operators_cfd", text="Probe Selected", ).command = "probe_selected"
-        row.prop(self, "auto_load_probes", text="Auto Load")
         # Manually load the probe results
-        row.operator("scene.compute_operators_cfd", text="Load Probes", ).command = "load_selected_probes"
+        box.row().operator("scene.compute_operators_cfd", text="Load Probes", ).command = "load_probes"
+        box.row().operator("scene.compute_operators_cfd", text="Recale selected", ).command = "rescale_selected"
+        split = box.split()
+        split.column().operator("scene.compute_operators_cfd", text="Hide selected", ).command = "hide_selected"
+        split.column().operator("scene.compute_operators_cfd", text="Unhide selected", ).command = "unhide_selected"
+
 
         # Only use this if you want to pull down the case
         box = layout.box()

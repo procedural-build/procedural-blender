@@ -10,6 +10,18 @@
 import bpy
 from procedural_compute.core.utils import make_tuples
 
+DEFAULT_THRESOLDS = '''
+[
+{"field": "sitting", "value": 4},
+{"field": "standing", "value": 6},
+{"field": "strolling", "value": 8},
+{"field": "business_walking", "value": 10},
+{"field": "uncomfortable", "value": 10},
+{"field": "unsafe_frail", "value": 15},
+{"field": "unsafe_all", "value": 20}
+]
+'''
+
 
 class SCENE_PROPS_COMPUTE_CFDControl(bpy.types.PropertyGroup):
 
@@ -50,6 +62,12 @@ class SCENE_PROPS_COMPUTE_CFDControl(bpy.types.PropertyGroup):
     n_angles: bpy.props.IntProperty(name="nAngles", default=16, description="Number of Angles for VWT")
     iters_n: bpy.props.IntProperty(name="itersN", default=0, description="Number of iterations for follow-on (series) simulations.  Set to zero to equal endTime")
 
+    # Properties for the wind threshold
+    epw_file: bpy.props.StringProperty(name="epwFile", default="//weather.epw", description="Path to where the EPW file is located.")
+    thresholds: bpy.props.StringProperty(name="thresholds", default=DEFAULT_THRESOLDS, description="Thresholds for different wind comfort categories. Input should be valid JSON.")
+    threshold_cpus: bpy.props.IntProperty(name="thresholdCPUs", default=8, description="CPUs to use")
+
+
     def drawMenu(self, layout):
         sc = bpy.context.scene
         split = layout.split()
@@ -61,8 +79,21 @@ class SCENE_PROPS_COMPUTE_CFDControl(bpy.types.PropertyGroup):
         box.row().label(text="Virtual Wind Tunnel")
         split = box.split()
         split.column().prop(self, "n_angles")
+        split.column().prop(self, "endTime")
         split.column().prop(self, "iters_n")
         box.row().operator("scene.compute_operators_cfd", text="Run Wind Tunnel").command = "run_wind_tunnel"
+
+        box = layout.box()
+        box.row().label(text="Probe VWT on Selected")
+        box.row().operator("scene.compute_operators_cfd", text="Probe VWT on Selected").command = "probe_vwt"
+
+        box = layout.box()
+        box.row().label(text="Wind Threshold")
+        box.row().prop(self, "epw_file")
+        box.row().prop(self, "thresholds")
+        split = box.split()
+        split.column().prop(self, "threshold_cpus")
+        split.column().operator("scene.compute_operators_cfd", text="Run Wind Thresholds").command = "run_wind_thresholds"
 
         #layout.row().prop(self, "stopAt", expand=False)
         #row = layout.row()

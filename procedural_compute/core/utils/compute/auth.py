@@ -117,7 +117,7 @@ class User():
         # Do the refresh
         response_dict = self.request('POST', '/auth-jwt/refresh/', {'refresh': self._refresh_token})
         self._access_token = response_dict['access']
-        logger.info("Refreshed token. Will expire in", self.token_exp_time)
+        logger.info(f"Refreshed token. Will expire in {self.token_exp_time}")
         return self.token
 
     def verify_token(self):
@@ -153,7 +153,7 @@ class User():
 
         def _include(i):
             return (i.get("method") in methods) and (i.get('id') in ids if ids else True)
-       
+
         _requests = [i for i in self.request_log if _include(i)]
         _requests = _requests[-1*n:] if len(_requests) >= n else _requests
 
