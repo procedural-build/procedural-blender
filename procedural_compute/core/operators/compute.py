@@ -7,17 +7,16 @@
 ###########################################################
 
 
+from procedural_compute.core.utils.compute.view import GenericViewSet
+from procedural_compute.core.utils.compute.auth import USER, User
+from procedural_compute.core.utils.secrets import secure_login
 import bpy
 import os
 import json
-import logging 
+import logging
 import time
 
 logger = logging.getLogger(__name__)
-
-from procedural_compute.core.utils.secrets import secure_login
-from procedural_compute.core.utils.compute.auth import USER, User
-from procedural_compute.core.utils.compute.view import GenericViewSet
 
 
 def get_system_properties():
@@ -32,7 +31,8 @@ class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
     bl_idname = "scene.compute_operators_core"
     bl_description = "Compute CFD Operations"
 
-    command: bpy.props.StringProperty(name="Command", description="parse String", default="")
+    command: bpy.props.StringProperty(
+        name="Command", description="parse String", default="")
 
     def execute(self, context):
         if hasattr(self, self.command):
@@ -47,7 +47,7 @@ class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
         return {'FINISHED'}
 
     def login(self):
-        """ Login user with provided details OR credentials from environment variables 
+        """ Login user with provided details OR credentials from environment variables
         """
         secure_login()
 
@@ -57,7 +57,7 @@ class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
         logger.info(f"REFRESHING USER TOKEN: {USER[0].token}")
         USER[0].refresh_token()
         _settings.access_token = USER[0].token
-        _settings.expire_time = "%.02f"%(USER[0].token_exp_time)
+        _settings.expire_time = "%.02f" % (USER[0].token_exp_time)
 
     def get_or_create_project_and_task(self):
         _settings = bpy.context.scene.Compute.task
@@ -72,8 +72,8 @@ class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
 
         # Get or create the project
         project = GenericViewSet('/api/project/').get_or_create(
-            { 'name': project_name },
-            create_params = { 'number': project_number or None },
+            {'name': project_name},
+            create_params={'number': project_number or None},
             create=True
         )
         if project:
@@ -83,15 +83,15 @@ class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
             _settings.project_data = json.dumps(project)
 
         # We won't get here unless the getting of project succeded
-        task  = GenericViewSet(f"/api/project/{project['uid']}/task/").get_or_create(
-            { 'name': task_name },
-            create_params = {
+        task = GenericViewSet(f"/api/project/{project['uid']}/task/").get_or_create(
+            {'name': task_name},
+            create_params={
                 'config': {
                     'case_dir': 'foam',
                     'task_type': 'parent'
                 }
             },
-            create = True
+            create=True
         )
         if task:
             _settings.task_name = task.get('name')
@@ -121,9 +121,17 @@ class SCENE_OT_COMPUTE_CORE(bpy.types.Operator):
             {
                 'config': config
             },
-            create = True
+            create=True
         )
         return action_task
+
+    def open_in_browser(self):
+        _settings = bpy.context.scene.Compute.task
+        project_id = _settings.project_id
+        task_id = _settings.task_id
+        bpy.ops.wm.url_open(
+            url=f"https://compute.procedural.build/project/{project_id}/task/"
+        )
 
 
 bpy.utils.register_class(SCENE_OT_COMPUTE_CORE)

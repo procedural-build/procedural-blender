@@ -113,8 +113,10 @@ class SCENE_OT_selectObjects(bpy.types.Operator):
     bl_label = "Select Objects By:"
     bl_options = {'REGISTER', 'UNDO'}
 
-    items_list = make_tuples(["None", "Construction", "Type", "Zone", "No Faces"])
-    method: bpy.props.EnumProperty(name="method", default="None", items=items_list, description="Select Objects of Same:")
+    items_list = make_tuples(
+        ["None", "Construction", "Type", "Zone", "No Faces"])
+    method: bpy.props.EnumProperty(
+        name="method", default="None", items=items_list, description="Select Objects of Same:")
 
     def draw(self, context):
         layout = self.layout

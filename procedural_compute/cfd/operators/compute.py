@@ -40,6 +40,29 @@ def get_system_properties():
     return (project_id, task_id, control_properties, solver_properties, _settings)
 
 
+def get_or_create_task(self, project_id, name, parent_task_id, dependent_on=None, config=None):
+    query_params = {
+        'name': name,
+        'parent': parent_task_id,
+    }
+    if dependent_on is not None:
+        query_params.update({'dependent_on': dependent_on})
+
+    if not config:
+        config = {'task_type': 'empty'}
+
+    action_task = GenericViewSet(
+        f'/api/project/{project_id}/task/'
+    ).get_or_create(
+        query_params,
+        {
+            'config': config
+        },
+        create = True
+    )
+    return action_task
+
+
 class SCENE_OT_cfdOperators(bpy.types.Operator):
     bl_label = "Compute CFD Operations"
     bl_idname = "scene.compute_operators_cfd"
@@ -49,9 +72,8 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
     def execute(self, context):
         if hasattr(self, self.command):
-            c = getattr(self, self.command)
             logger.info(f"\n\n###### EXECUTING CFD OPERATION: {self.command} ######\n")
-            c()
+            getattr(self, self.command)(context)
         else:
             logger.info(f"{self.command}: Attribute not found!")
         return{'FINISHED'}
@@ -60,16 +82,16 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         self.execute(context)
         return{'FINISHED'}
 
-    def login(self):
+    def login(self, context):
         """ Login user with provided details OR credentials from environment variables
         """
         secure_login()
 
-    def refresh(self):
+    def refresh(self, context):
         """ """
         bpy.ops.scene.compute_operators_core(command="refresh")
 
-    def get_or_create_project_and_task(self):
+    def get_or_create_project_and_task(self, context):
         _settings = bpy.context.scene.Compute.CFD.task
         project_name = _settings.project_name.strip()
         project_number = _settings.project_number
@@ -113,7 +135,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             'task': task
         }
 
-    def upload_geometry(self):
+    def upload_geometry(self, context):
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
         geometry_objects = [obj for obj in bpy.context.visible_objects if not self._separate_stl(obj)]
@@ -130,7 +152,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             raw=True
         )
 
-        self.upload_separate_surfaces()
+        self.upload_separate_surfaces(context)
 
         return response
 
@@ -141,7 +163,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         cellset_objects = [obj for obj in bpy.context.visible_objects if obj.Compute.CFD.mesh.makeCellSet]
         return True if cellset_objects else False
 
-    def upload_separate_surfaces(self):
+    def upload_separate_surfaces(self, context):
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
         logger.info("Writing refinement regions")
@@ -161,7 +183,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
                 raw=True
             )
 
-    def upload_setset(self):
+    def upload_setset(self, context):
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
         cellset_objects = [obj for obj in bpy.context.visible_objects if obj.Compute.CFD.mesh.makeCellSet]
@@ -182,29 +204,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
                 raw=True
             )
 
-    def get_or_create_task(self, project_id, name, parent_task_id, dependent_on=None, config=None):
-        query_params = {
-            'name': name,
-            'parent': parent_task_id,
-        }
-        if dependent_on is not None:
-            query_params.update({'dependent_on': dependent_on})
-
-        if not config:
-            config = {'task_type': 'empty'}
-
-        action_task = GenericViewSet(
-            f'/api/project/{project_id}/task/'
-        ).get_or_create(
-            query_params,
-            {
-                'config': config
-            },
-            create = True
-        )
-        return action_task
-
-    def write_mesh_files(self):
+    def write_mesh_files(self, context):
         """ Upload the geometry and dispatch the task in one operation
         """
         mesh_properties = bpy.context.scene.Compute.CFD.mesh
@@ -212,12 +212,12 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
         # Get or create an empty setup task
-        setup_task = self.get_or_create_task(
+        setup_task = get_or_create_task(
             project_id, 'setup', task_id,
         )
 
         # Get or create the mesh setup task as a child
-        setup_mesh_task = self.get_or_create_task(
+        setup_mesh_task = get_or_create_task(
             project_id, 'setup mesh', setup_task['uid']
         )
 
@@ -238,17 +238,17 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         return setup_mesh_task
 
-    def write_solver_files(self):
+    def write_solver_files(self, context):
         solver_properties = bpy.context.scene.Compute.CFD.solver
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
         # Get or create an empty setup task
-        setup_task = self.get_or_create_task(
+        setup_task = get_or_create_task(
             project_id, 'setup', task_id
         )
 
         # Get or create the mesh setup task as a child
-        setup_solution_task = self.get_or_create_task(
+        setup_solution_task = get_or_create_task(
             project_id, 'setup solution', setup_task['uid']
         )
 
@@ -270,17 +270,17 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         return setup_solution_task
 
 
-    def run_mesh_pipeline(self):
+    def run_mesh_pipeline(self, context):
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
         decompN = bpy.context.scene.Compute.CFD.task.decompN
 
         # Get or create an empty setup task
-        setup_task = self.get_or_create_task(
+        setup_task = get_or_create_task(
             project_id, 'setup', task_id
         )
 
         # Get or create the mesh task
-        mesh_task = self.get_or_create_task(
+        mesh_task = get_or_create_task(
             project_id, 'mesh', task_id, dependent_on=setup_task['uid']
         )
 
@@ -314,19 +314,19 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         return mesh_task
 
-    def run_solver(self):
+    def run_solver(self, context):
         solver_properties = bpy.context.scene.Compute.CFD.solver
         control_properties = bpy.context.scene.Compute.CFD.control
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
         decompN = bpy.context.scene.Compute.CFD.task.decompN
 
         # Get or create the mesh task
-        mesh_task = self.get_or_create_task(
+        mesh_task = get_or_create_task(
             project_id, 'mesh', task_id
         )
 
         # Get or create an empty setup task
-        solver_task = self.get_or_create_task(
+        solver_task = get_or_create_task(
             project_id, 'solution', task_id, dependent_on=mesh_task['uid']
         )
 
@@ -354,7 +354,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         return solver_task
 
-    def run_wind_tunnel(self):
+    def run_wind_tunnel(self, context):
         solver_properties = bpy.context.scene.Compute.CFD.solver
         mesh_properties = bpy.context.scene.Compute.CFD.mesh
         control_properties = bpy.context.scene.Compute.CFD.control
@@ -362,7 +362,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         decompN = bpy.context.scene.Compute.CFD.task.decompN
 
         # Get or create the mesh task
-        mesh_task = self.get_or_create_task(
+        mesh_task = get_or_create_task(
             project_id, 'mesh', task_id
         )
 
@@ -378,7 +378,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         bounding_box = [abs(bb['max'][i] - bb['min'][i]) for i in range(3)]
 
         # Get or create an empty setup task
-        solver_task = self.get_or_create_task(
+        solver_task = get_or_create_task(
             project_id, 'VirtualWindTunnel', task_id,
             dependent_on=mesh_task['uid'],
             config = {
@@ -398,7 +398,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         return solver_task
 
-    def probe_vwt(self):
+    def probe_vwt(self, context):
         solver_properties = bpy.context.scene.Compute.CFD.solver
         postproc_properties = bpy.context.scene.Compute.CFD.postproc
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
@@ -418,7 +418,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         # Set the original values again
         [setattr(postproc_properties, key, value) for key, value in org_attrs.items()]
 
-    def upload_epw(self):
+    def upload_epw(self, context):
         control_properties = bpy.context.scene.Compute.CFD.control
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
@@ -432,13 +432,13 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         return weather_file_path
 
-    def run_wind_thresholds(self):
+    def run_wind_thresholds(self, context):
         solver_properties = bpy.context.scene.Compute.CFD.solver
         control_properties = bpy.context.scene.Compute.CFD.control
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
         # Get or create an empty setup task
-        sub_task = self.get_or_create_task(
+        sub_task = get_or_create_task(
             project_id, 'WindThreshold', task_id, dependent_on=self.task_name_to_uid("probe")
         )
 
@@ -469,7 +469,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         return threshold_task
 
-    def clean_processor_dirs(self, path_prefix="foam"):
+    def clean_processor_dirs(self, context, path_prefix="foam"):
         solver_properties = bpy.context.scene.Compute.CFD.solver
         control_properties = bpy.context.scene.Compute.CFD.control
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
@@ -494,7 +494,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             logger.info(f"Deleted processor path: {path}")
             time.sleep(0.05)     # Sleep for a bit to avoid throttling
 
-    def clean_mesh_files(self, path_prefix="foam/constant"):
+    def clean_mesh_files(self, context, path_prefix="foam/constant"):
         solver_properties = bpy.context.scene.Compute.CFD.solver
         control_properties = bpy.context.scene.Compute.CFD.control
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
@@ -528,7 +528,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             logger.info(f"Deleted mesh file path: {path}")
             time.sleep(0.05)     # Sleep for a bit to avoid throttling
 
-    def upload_probe_points(self):
+    def upload_probe_points(self, context):
         control_properties = bpy.context.scene.Compute.CFD.control
         postproc_properties = bpy.context.scene.Compute.CFD.postproc
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
@@ -550,13 +550,13 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         return response
 
-    def task_name_to_uid(self, task_name):
+    def task_name_to_uid(self, context, task_name):
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
-        return self.get_or_create_task(
+        return get_or_create_task(
             project_id, task_name, task_id
         )['uid']
 
-    def probe_selected(self, dependent_on=None):
+    def probe_selected(self, context, dependent_on=None):
         solver_properties = bpy.context.scene.Compute.CFD.solver
         postproc_properties = bpy.context.scene.Compute.CFD.postproc
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
@@ -564,7 +564,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         task_kwargs = {"dependent_on": self.task_name_to_uid(dependent_on)} if dependent_on else {}
 
         # Get or create an empty setup task
-        sub_task = self.get_or_create_task(
+        sub_task = get_or_create_task(
             project_id, 'probe', task_id, **task_kwargs
         )
 
@@ -604,7 +604,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         return setup_task
 
-    def load_probe_file(self, filename=""):
+    def load_probe_file(self, context, filename=""):
         from procedural_compute.core.operators import fetch_async, fetch_sync, test_async
 
         postproc_properties = bpy.context.scene.Compute.CFD.postproc
@@ -623,7 +623,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         )
         #test_async(url=file_url, callback=handle_probe_data)
 
-    def rescale_selected(self):
+    def rescale_selected(self, context):
         postproc_properties = bpy.context.scene.Compute.CFD.postproc
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
@@ -636,15 +636,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             # Scale the values
             color_vertices_from_face_attr(obj, scale=scale, attr_name=attr_name)
 
-    def hide_selected(self):
-        for obj in bpy.context.selected_objects:
-            obj.hide_viewport = True
-
-    def unhide_selected(self):
-        for obj in bpy.context.selected_objects:
-            obj.hide_viewport = False
-
-    def load_probes(self):
+    def load_probes(self, context):
         solver_properties = bpy.context.scene.Compute.CFD.solver
         postproc_properties = bpy.context.scene.Compute.CFD.postproc
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
@@ -660,10 +652,10 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         logger.info(f"Got probe files: {filenames}")
 
         for filename in filenames:
-            self.load_probe_file(filename=filename)
+            self.load_probe_file(context, filename=filename)
 
 
-    def clean_task(self):
+    def clean_task(self, context):
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
         # Get the file list

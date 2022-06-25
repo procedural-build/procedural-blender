@@ -12,3 +12,4 @@ from .object import *
 from .scene import *
 from .aiotasks import *
 from .compute import *
+from .outliner import *

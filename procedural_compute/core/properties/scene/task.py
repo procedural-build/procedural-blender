@@ -27,5 +27,6 @@ class SCENE_PROPS_COMPUTE_CORE_TASK(bpy.types.PropertyGroup):
         row.enabled = False
 
         L.row().operator("scene.compute_operators_core", text="Get or Create").command = "get_or_create_project_and_task"
+        L.row().operator("scene.compute_operators_core", text="Open in Browser").command = "open_in_browser"
 
 bpy.utils.register_class(SCENE_PROPS_COMPUTE_CORE_TASK)

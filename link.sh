@@ -3,7 +3,7 @@
 # For development only:
 # Symbollically link the source folder into your Blender addons folder.
 
-DEFAULTADDONPATH="$HOME/.config/blender/3.1/scripts/addons"
+DEFAULTADDONPATH="$HOME/.config/blender/3.2/scripts/addons"
 
 read -p "Enter path to addon folder [$DEFAULTADDONPATH]:" USERADDONPATH
 

@@ -46,5 +46,5 @@ class SCENE_PROPS_COMPUTE_CFD_Task(bpy.types.PropertyGroup):
         L.row().operator("scene.compute_operators_cfd", text="Get or Create").command = "get_or_create_project_and_task"
 
         L.row().prop(self, "decompN")
-        
+
 bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFD_Task)

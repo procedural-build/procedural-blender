@@ -52,8 +52,8 @@ class SCENE_PROPS_COMPUTE_CFDPostProc(bpy.types.PropertyGroup):
         box.row().operator("scene.compute_operators_cfd", text="Load Probes", ).command = "load_probes"
         box.row().operator("scene.compute_operators_cfd", text="Recale selected", ).command = "rescale_selected"
         split = box.split()
-        split.column().operator("scene.compute_operators_cfd", text="Hide selected", ).command = "hide_selected"
-        split.column().operator("scene.compute_operators_cfd", text="Unhide selected", ).command = "unhide_selected"
+        split.column().operator("outliner.general_operator", text="Hide selected", ).command = "hide_selected"
+        split.column().operator("outliner.general_operator", text="Unhide selected", ).command = "unhide_selected"
 
 
         # Only use this if you want to pull down the case
