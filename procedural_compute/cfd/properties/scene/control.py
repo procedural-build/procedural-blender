@@ -65,6 +65,7 @@ class SCENE_PROPS_COMPUTE_CFDControl(bpy.types.PropertyGroup):
     # Properties for the wind threshold
     epw_file: bpy.props.StringProperty(name="epwFile", default="//weather.epw", description="Path to where the EPW file is located.")
     thresholds: bpy.props.StringProperty(name="thresholds", default=DEFAULT_THRESOLDS, description="Thresholds for different wind comfort categories. Input should be valid JSON.")
+    north_angle: bpy.props.FloatProperty(name="northAngle", default=0.0, description="The angle to true north RELATIVE to the model orientation")
     threshold_cpus: bpy.props.IntProperty(name="thresholdCPUs", default=8, description="CPUs to use")
 
 
@@ -91,6 +92,7 @@ class SCENE_PROPS_COMPUTE_CFDControl(bpy.types.PropertyGroup):
         box.row().label(text="Wind Threshold")
         box.row().prop(self, "epw_file")
         box.row().prop(self, "thresholds")
+        box.row().prop(self, "north_angle")
         split = box.split()
         split.column().prop(self, "threshold_cpus")
         split.column().operator("scene.compute_operators_cfd", text="Run Wind Thresholds").command = "run_wind_thresholds"

@@ -135,6 +135,14 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             'task': task
         }
 
+    def open_in_browser(self, context):
+        _settings = bpy.context.scene.Compute.CFD.task
+        project_id = _settings.project_id
+        task_id = _settings.task_id
+        bpy.ops.wm.url_open(
+            url=f"https://compute.procedural.build/project/{project_id}/task/"
+        )
+
     def upload_geometry(self, context):
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
@@ -450,6 +458,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
             'cmd': 'run_wind_thresholds',
             'case_dir': "VWT/",
             "epw_file": weather_file_path,
+            "north_angle": control_properties.north_angle,
             'patches': [obj.name for obj in bpy.context.selected_objects if obj.type == "MESH"],
             'thresholds': json.loads(control_properties.thresholds),
             'set_foam_patch_fields': False,
