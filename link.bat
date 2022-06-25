@@ -1,5 +1,5 @@
 @echo off
-set "defaultaddonpath=C:\Program Files\Blender Foundation\Blender 3.0\3.0\scripts\addons"
+set "defaultaddonpath=C:\Program Files\Blender Foundation\Blender 3.2\3.2\scripts\addons"
 set /p useraddonpath="Enter path to addon folder [%defaultaddonpath%]:"
 
 set addonpath=%defaultaddonpath%
