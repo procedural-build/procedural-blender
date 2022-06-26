@@ -45,7 +45,13 @@ def point_and_value_vectors(line: str):
     return parts[:3], _value_to_vector(parts[3:])
 
 
-def map_to_polygons(obj, point_values, default=Vector([0, 0, 0]), warning_tol=1e-3):
+def get_probe_points_and_values(lines):
+    point_value_tuples = [point_and_value_vectors(line) for line in lines]
+    return list(zip(*point_value_tuples))
+
+
+def face_probe_index_map(obj, points, warning_tol=1e-3):
+    """ Given a list of points map the index to a custom face-attribute on the object mesh"""
     mesh = obj.data
     size = len(mesh.polygons)
 
@@ -55,18 +61,34 @@ def map_to_polygons(obj, point_values, default=Vector([0, 0, 0]), warning_tol=1e
         kd.insert(obj.matrix_world @ p.center, p.index)
     kd.balance()
 
-    # Use the kdtree to find the
-    face_values = [default]*size
-    for point, value in point_values:
+    probe_indices = [-1 for i in range(size)]
+    for i in range(len(points)):
+        point = points[i]
         # Get the nearest polygon face to the point
         co, index, dist = kd.find(point)
         if dist > warning_tol:
-            logger.info(
-                f"Point {point} not within {warning_tol} of face center.  Got distance {dist} to polygon {index} at {co}")
-        face_values[index] = value
+            logger.info(f"Point {point} not within {warning_tol} of face center.  Got distance {dist} to polygon {index} at {co}")
+        # Set the attribute value
+        probe_indices[index] = i
+    
+    return probe_indices
 
-    # Return the face values
-    return face_values
+
+def set_face_probe_index(obj, points, attr_name="probe_index"):
+    mesh_attr = _get_or_create_attribute(obj.data, attr_name, type='INT', domain='FACE')
+    mesh_attr.data.foreach_set('value', face_probe_index_map(obj, points))
+    logger.info(f"Set face attribute {attr_name} on object {obj.name}")
+
+
+def get_face_probe_value(obj, values, default=Vector([0, 0, 0]), attr_name="probe_index"):
+    probe_indices = [-1] * len(obj.data.polygons)
+    obj.data.attributes[attr_name].data.foreach_get('value', probe_indices)
+    return [(values[i] if i >= 0 else default) for i in probe_indices]
+
+
+def map_to_polygons(obj, points, values, default=Vector([0, 0, 0]), warning_tol=1e-3):
+    probe_indices = face_probe_index_map(obj, points)
+    return [(values[i] if i >= 0 else default) for i in probe_indices]
 
 
 def _flatten(vectors: list):
@@ -95,35 +117,39 @@ def color_vertices_from_face_attr(obj, alpha=1.0, scale=[0, 1], attr_name="probe
     logger.info(f"Setting color of object vertices {obj.name} [alpha={alpha}]")
     color_polygons(obj, values=scale_values, alpha=alpha)
 
+def _get_or_create_attribute(mesh, attr_name, **kwargs):
+    if not attr_name in mesh.attributes:
+        return mesh.attributes.new(name=attr_name, **kwargs)
+    return mesh.attributes[attr_name]
 
-def color_object(obj, lines, scale=[0, 1], alpha=1.0):
+def _ensure_probe_index_set(obj, attr_name="probe_index", points=[]):
+    if attr_name in obj.data.attributes:
+        return None
+    if not points:
+        raise Exception(f"No attribute probe_index found on object: {obj.name} and no points provided to function color_object.  Unable to map results to vertex colors.")
+    logger.info(f"Setting probe_index attribute on mesh faces for object: {obj.name}")
+    set_face_probe_index(obj, points)
+
+def color_object(obj, values: list[Vector], points=[], scale=[0, 1], alpha=1.0):
     attr_name = "probe_result"
-
-    # Explode the mesh object to individual faces
-    explode_polygons_to_mesh(obj)
-
-    # Set a custom property that tags the object type
-    field_type = "vector" if len(lines[0].split()) > 4 else "scale"
-    obj["probe_field_type"] = field_type
-
-    # Get the face values as vectors
-    logger.info(f"Converting strings to points and values [scale={scale}]")
-    point_values = [point_and_value_vectors(line) for line in lines]
-    logger.info(f"Got points and values for {len(point_values)}")
 
     # Match the points to the polygon centers (because openfoam crops them out)
     logger.info("Mapping points and values to polygon centers")
-    face_values = map_to_polygons(obj, point_values)
+    _ensure_probe_index_set(obj, points=points)
+    face_values = get_face_probe_value(obj, values)
     logger.info("Done mapping points and values to polygon centers")
 
     # Get the values in the strings as floats
-    logger.info(f"Setting face attributes {attr_name} on object: {obj.name}")
-    obj.data.attributes.new(name=attr_name, type='FLOAT_VECTOR', domain='FACE')
-    obj.data.attributes[attr_name].data.foreach_set(
-        'vector', _flatten(face_values))
-    logger.info(f"Done setting raw face attributes")
+    logger.info(f"Setting raw probe result data on face attribute: {attr_name} on object: {obj.name}")
+    _get_or_create_attribute(
+        obj.data, attr_name, type='FLOAT_VECTOR', domain='FACE'
+    ).data.foreach_set(
+        'vector', _flatten(face_values)
+    )
+    logger.info(f"Done setting raw probe data to face attributes")
 
     # Color the vertices from raw values set as face attributes
     color_vertices_from_face_attr(
-        obj, alpha=alpha, scale=scale, attr_name=attr_name)
+        obj, alpha=alpha, scale=scale, attr_name=attr_name
+    )
     logger.info(f"Done coloring object")

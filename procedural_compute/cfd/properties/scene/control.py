@@ -8,19 +8,51 @@
 
 
 import bpy
+import json
 from procedural_compute.core.utils import make_tuples
 
-DEFAULT_THRESOLDS = '''
-[
-{"field": "sitting", "value": 4},
-{"field": "standing", "value": 6},
-{"field": "strolling", "value": 8},
-{"field": "business_walking", "value": 10},
-{"field": "uncomfortable", "value": 10},
-{"field": "unsafe_frail", "value": 15},
-{"field": "unsafe_all", "value": 20}
-]
-'''
+import logging
+logger = logging.getLogger(__name__)
+
+THRESHOLDS = {
+    "NEN-8100": [
+        {"field": "sitting long", "value": 5},
+        {"field": "sitting short", "value": 5},
+        {"field": "walking leisurely", "value": 5},
+        {"field": "walking fast", "value": 5},
+        {"field": "uncomfortable", "value": 5}
+    ],
+    "Davenport": [
+        {"field": "sitting long", "value": 3.6},
+        {"field": "sitting short", "value": 5.3},
+        {"field": "walking leisurely", "value": 7.6},
+        {"field": "walking fast", "value": 9.8},
+        {"field": "uncomfortable", "value": 9.8},
+        {"field": "dangerous", "value": 15.1}
+    ],
+    "LawsonLDDC": [
+        {"field": "frequent sitting", "value": 2.5},
+        {"field": "occasional sitting", "value": 4},
+        {"field": "standing", "value": 6},
+        {"field": "walking", "value": 8},
+        {"field": "uncomfortable", "value": 8},
+        {"field": "unsafe", "value": 15}
+    ],
+    "Lawson2001": [
+        {"field": "sitting", "value": 4},
+        {"field": "standing", "value": 6},
+        {"field": "strolling", "value": 8},
+        {"field": "business_walking", "value": 10},
+        {"field": "uncomfortable", "value": 10},
+        {"field": "unsafe_frail", "value": 15},
+        {"field": "unsafe_all", "value": 20}
+    ]
+}
+
+def set_thresholds(self, context):
+    logger.info(f"Setting thresholds from preset: {self.preset_thresholds}")
+    _thresholds = THRESHOLDS.get(self.preset_thresholds, None) or THRESHOLDS["Lawson2001"]
+    self.thresholds = json.dumps(_thresholds)
 
 
 class SCENE_PROPS_COMPUTE_CFDControl(bpy.types.PropertyGroup):
@@ -64,10 +96,10 @@ class SCENE_PROPS_COMPUTE_CFDControl(bpy.types.PropertyGroup):
 
     # Properties for the wind threshold
     epw_file: bpy.props.StringProperty(name="epwFile", default="//weather.epw", description="Path to where the EPW file is located.")
-    thresholds: bpy.props.StringProperty(name="thresholds", default=DEFAULT_THRESOLDS, description="Thresholds for different wind comfort categories. Input should be valid JSON.")
+    preset_thresholds: bpy.props.EnumProperty(name="startFrom", items=make_tuples([i for i in THRESHOLDS.keys()] + ["Custom"]), description="Preset thresholds", default="Lawson2001", update=set_thresholds)
+    thresholds: bpy.props.StringProperty(name="thresholds", default=json.dumps(THRESHOLDS["Lawson2001"]), description="Thresholds for different wind comfort categories. Input should be valid JSON.")
     north_angle: bpy.props.FloatProperty(name="northAngle", default=0.0, description="The angle to true north RELATIVE to the model orientation")
     threshold_cpus: bpy.props.IntProperty(name="thresholdCPUs", default=8, description="CPUs to use")
-
 
     def drawMenu(self, layout):
         sc = bpy.context.scene
@@ -91,6 +123,7 @@ class SCENE_PROPS_COMPUTE_CFDControl(bpy.types.PropertyGroup):
         box = layout.box()
         box.row().label(text="Wind Threshold")
         box.row().prop(self, "epw_file")
+        box.row().prop(self, "preset_thresholds")
         box.row().prop(self, "thresholds")
         box.row().prop(self, "north_angle")
         split = box.split()

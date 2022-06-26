@@ -1,3 +1,9 @@
+import random
+
+import logging
+logger = logging.getLogger(__name__)
+
+
 def _get_color_or_random(index, colors):
     if index < len(colors):
         return colors[index]
@@ -25,10 +31,10 @@ def explode_polygons_to_mesh(obj, force=False):
     vertices.  This is required for coloring the faces with vertex colors.
     """
     if (not force) and is_exploded(obj):
-        print("Mesh is already exploded.  Not exploding faces.  Set kwarg force=True to bypass this.")
+        logger.info(f"Mesh on object {obj.name} is already exploded.  Not exploding faces.  Set kwarg force=True to bypass this.")
         return None
 
-    print(f"Exploding faces on mesh for object: {obj.name}")
+    logger.info(f"Exploding faces on mesh for object: {obj.name}")
     vertices = []
     faces = []
     # Construct a new set of vertices and faces
@@ -76,7 +82,7 @@ def print_poly_colors(obj):
     color_layer = obj.data.vertex_colors["Col"]
     for poly in obj.data.polygons:
         vertex_indices = [i for i in poly.vertices]
-        print(f"POLYGON: {poly.index}: {vertex_indices}")
+        logger.info(f"POLYGON: {poly.index}: {vertex_indices}")
         for vi in poly.vertices:
             color_values = [i for i in color_layer.data[vi].color]
-            print(f" - {vi}: {color_values}")
+            logger.info(f" - {vi}: {color_values}")

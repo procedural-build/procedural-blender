@@ -7,10 +7,10 @@
 ###########################################################
 
 
+from multiprocessing.sharedctypes import Value
 import bpy
 import os
-import shutil
-import glob
+import csv
 import json
 import io
 import re
@@ -25,11 +25,20 @@ import procedural_compute.cfd.solvers
 from procedural_compute.core.utils.compute.auth import USER, User
 from procedural_compute.core.utils.compute.view import GenericViewSet
 
-from .utils import get_sets_from_selected, color_object, color_vertices_from_face_attr
+from .utils import (
+    get_sets_from_selected, 
+    color_object, 
+    color_vertices_from_face_attr, 
+    set_face_probe_index, 
+    explode_polygons_to_mesh, 
+    get_probe_points_and_values
+)
 
 import logging
 logger = logging.getLogger(__name__)
 
+from threading import Lock
+thread_lock = Lock()
 
 def get_system_properties():
     _settings = bpy.context.scene.Compute.CFD.task
@@ -613,6 +622,19 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
 
         return setup_task
 
+    def rescale_selected(self, context):
+        postproc_properties = bpy.context.scene.Compute.CFD.postproc
+        (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
+
+        attr_name = "probe_result"
+        scale = [postproc_properties.probe_min_range, postproc_properties.probe_max_range]
+
+        for obj in bpy.context.selected_objects:
+            if not attr_name in obj.data.attributes:
+                logger.warn(f"Object {obj.name} has no attribute '{attr_name}' set.  Skipping.")
+            # Scale the values
+            color_vertices_from_face_attr(obj, scale=scale, attr_name=attr_name)
+
     def load_probe_file(self, context, filename=""):
         from procedural_compute.core.operators import fetch_async, fetch_sync, test_async
 
@@ -632,21 +654,7 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         )
         #test_async(url=file_url, callback=handle_probe_data)
 
-    def rescale_selected(self, context):
-        postproc_properties = bpy.context.scene.Compute.CFD.postproc
-        (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
-
-        attr_name = "probe_result"
-        scale = [postproc_properties.probe_min_range, postproc_properties.probe_max_range]
-
-        for obj in bpy.context.selected_objects:
-            if not attr_name in obj.data.attributes:
-                logger.warn(f"Object {obj.name} has no attribute '{attr_name}' set.  Skipping.")
-            # Scale the values
-            color_vertices_from_face_attr(obj, scale=scale, attr_name=attr_name)
-
     def load_probes(self, context):
-        solver_properties = bpy.context.scene.Compute.CFD.solver
         postproc_properties = bpy.context.scene.Compute.CFD.postproc
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
 
@@ -663,6 +671,47 @@ class SCENE_OT_cfdOperators(bpy.types.Operator):
         for filename in filenames:
             self.load_probe_file(context, filename=filename)
 
+    def load_field_result_matrix(self, context, filename=""):
+        from procedural_compute.core.operators import fetch_async, fetch_sync, test_async
+
+        postproc_properties = bpy.context.scene.Compute.CFD.postproc
+        (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
+
+        base_url = f"/api/task/{task_id}/file"
+        file_url = f"{base_url}/{filename}/"
+
+        logger.info(f"Requests async download of file from: {file_url}")
+        fetch_async(
+            file_url,
+            callback=handle_result_matrix_data,
+            callback_kwargs={"scale": [postproc_properties.probe_min_range, postproc_properties.probe_max_range]},
+            timeout=600,
+            query_params={'download': 'true'}
+        )
+        #test_async(url=file_url, callback=handle_probe_data)
+
+    def load_field_result_matrices(self, context):
+        postproc_properties = bpy.context.scene.Compute.CFD.postproc
+        (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
+
+        # We should first check the VWT folder and get all of the angles that are available
+        logger.info(f"Getting file list for task: {task_id}")
+        all_files = GenericViewSet(f'/api/task/{task_id}/file/').list()
+
+        # Look at the 0 folder to get the fields
+        prefix = f"{postproc_properties.matrix_result_case_dir}/0/"
+        field_filenames = set([f.get("file") for f in all_files if f.get("file").startswith(prefix)])
+        fields = [i.split("/")[-1] for i in field_filenames]
+        logger.info(f"Got fields: {fields} from files in 0 folder: {field_filenames}")
+
+        # Filter just the files we want
+        _regex = f"{postproc_properties.matrix_result_case_dir}/[^/]*\.({'|'.join(fields)})"
+        filenames = [f.get("file") for f in all_files if re.match(_regex, f.get("file"))]
+        #filenames = filenames[:1] # for debugging only
+        logger.info(f"Getting result matrix: {filenames}")
+
+        for filename in filenames:
+            self.load_field_result_matrix(context, filename=filename)
 
     def clean_task(self, context):
         (project_id, task_id) = bpy.context.scene.Compute.CFD.task.ids
@@ -737,6 +786,7 @@ def get_or_create_collection_path(path: list):
         collections.append(get_or_create_collection(collections[i], path[i]))
     return collections
 
+
 def handle_probe_data(file_url, data, scale=[0, 5]):
     lines = data.splitlines()
     logger.info(f"GOT DATA FOR {file_url} with {len(lines)} lines.")
@@ -757,16 +807,89 @@ def handle_probe_data(file_url, data, scale=[0, 5]):
         logger.info(f"Deleting existing object {target_object.name} from collection {target_collection.name}")
         bpy.data.objects.remove(target_object, do_unlink=True)
 
-    # Copy the base object (and mesh) and link to the target collection
+    # Get the object from where these probes originated
     obj = bpy.data.objects[object_name]
+
+    # Set the index of the points against the original object (used later to map result-matrices that don't have coordinates)
+    thread_lock.acquire()
+    if not "probe_index" in obj.data.attributes:
+        explode_polygons_to_mesh(obj)
+        points = [[_to(i, _type=float) for i in line.split()[:3]] for line in lines]
+        set_face_probe_index(obj, points)
+    thread_lock.release()
+
+    # Copy the base object (and mesh) and link to the target collection
     target_object = obj.copy()
     target_object.data = obj.data.copy()
     target_object.name = target_object_name
     target_collection.objects.link(target_object)
     logger.info(f"Copied object {obj.name} to {target_object.name} in collection {target_collection.name}")
 
+    # Set a custom property that tags the object type
+    target_object["probe_field_type"] = "vector" if len(lines[0].split()) > 4 else "scale"
+
+    # Ensure that this new object is exploded
+    explode_polygons_to_mesh(target_object)
+    (centre_points, values) = get_probe_points_and_values(lines)
+
     # Color the object
-    color_object(target_object, lines, scale=scale)
+    color_object(target_object, values, points=centre_points, scale=scale)
+
+def get_matrix_result_object_field_names(file_url):
+    url_parts = [i for i in file_url.split("/") if i]
+    file_name = url_parts[-1]
+    field_name = file_name.split(".")[-1]
+    object_name = ".".join(file_name.split(".")[:-1])
+    case_dir = "-".join([i for i in file_url.split("/file/")[1].split("/") if i][:-1])
+    return case_dir, object_name, field_name
+
+def _to(value, _type=float, error_value=None):
+    try:
+        return _type(value)
+    except ValueError:
+        return error_value if error_value is not None else value
+    return value
+
+def handle_result_matrix_data(file_url, data, scale=[0, 5]):
+    from mathutils import Vector
+    lines = data.splitlines()
+    logger.info(f"GOT DATA FOR {file_url} with {len(lines)} lines.")
+
+    # Deconstruct the file name to get the details of where we will store the object
+    (case_dir, object_name, field_name) = get_matrix_result_object_field_names(file_url)
+
+    # Create the nested collections to where we will store the results for each angle/field
+    collections = get_or_create_collection_path([case_dir, f"{object_name}-{field_name}"])
+    target_collection = collections[-1]
+    logger.info(f"Got target collection: {'/'.join([i.name for i in collections])}")
+
+    # Get the data columns
+    rows = [row for row in csv.reader(lines, delimiter=",") if row]
+    n_columns = len(rows[0])
+
+    for i in range(n_columns):
+        values = [Vector([_to(row[i], _type=float, error_value=-1), 0, 0]) for row in rows]
+
+        # Get the 
+        target_object_name = f"{object_name}-{field_name}-{'%02i'%(i)}"
+        logger.info(f"Setting values to collection: {case_dir}/{field_name}-{object_name} in object: {target_object_name} [scale={scale}]")
+
+        # Delete any object that might already exist
+        target_object = target_collection.objects.get(target_object_name)
+        if target_object:
+            logger.info(f"Deleting existing object {target_object.name} from collection {target_collection.name}")
+            bpy.data.objects.remove(target_object, do_unlink=True)
+
+        # Copy the base object (and mesh) and link to the target collection
+        obj = bpy.data.objects[object_name]
+        target_object = obj.copy()
+        target_object.data = obj.data.copy()
+        target_object.name = target_object_name
+        target_collection.objects.link(target_object)
+        logger.info(f"Copied object {obj.name} to {target_object.name} in collection {target_collection.name}")
+
+        # Color the object
+        color_object(target_object, values, scale=scale)
 
 def get_sample_files_set(s):
     name = s.get("name")

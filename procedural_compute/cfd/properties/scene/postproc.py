@@ -23,6 +23,7 @@ class SCENE_PROPS_COMPUTE_CFDPostProc(bpy.types.PropertyGroup):
     probe_min_range: bpy.props.FloatProperty(name="Probe Min Range", default=0.0, description="Probe Min Range")
     probe_max_range: bpy.props.FloatProperty(name="Probe Max Range", default=5.0, description="Probe Max Range")
 
+    matrix_result_case_dir: bpy.props.StringProperty(name="Matrix result dir", default='urbanComfort', description="Case dir that contains matrix results to load (on server)")
 
     def drawMenu(self, layout):
         is_not_windows = 'Windows' not in bpy.app.build_platform.decode()
@@ -51,21 +52,23 @@ class SCENE_PROPS_COMPUTE_CFDPostProc(bpy.types.PropertyGroup):
         # Manually load the probe results
         box.row().operator("scene.compute_operators_cfd", text="Load Probes", ).command = "load_probes"
         box.row().operator("scene.compute_operators_cfd", text="Recale selected", ).command = "rescale_selected"
-        split = box.split()
-        split.column().operator("outliner.general_operator", text="Hide selected", ).command = "hide_selected"
-        split.column().operator("outliner.general_operator", text="Unhide selected", ).command = "unhide_selected"
 
+        box = layout.box()
+        row = box.row()
+        row.prop(self, "matrix_result_case_dir")
+        # Manually load the probe results
+        box.row().operator("scene.compute_operators_cfd", text="Load Result Matrices", ).command = "load_field_result_matrices"
+        box.row().operator("scene.compute_operators_cfd", text="Recale selected", ).command = "rescale_selected"
 
         # Only use this if you want to pull down the case
-        box = layout.box()
-        box.row().prop(sc.Compute.CFD.system, "caseDir")
-        box.row().operator("scene.compute_operators_cfd", text="Pull folder", ).command = "pull_to_local"
+        #box = layout.box()
+        #box.row().prop(sc.Compute.CFD.system, "caseDir")
+        #box.row().operator("scene.compute_operators_cfd", text="Pull folder", ).command = "pull_to_local"
 
         # Open Paraview
         box = layout.box()
-        row = box.row()
-        row.operator("scene.cfdoperators", text="Open ParaView", ).command = "paraView"
-        row.enabled = is_not_windows
+        box.row().operator("scene.compute_operators_cfd", text="Open in Browser").command = "open_in_browser"
+        #row.enabled = is_not_windows
 
 
 bpy.utils.register_class(SCENE_PROPS_COMPUTE_CFDPostProc)
